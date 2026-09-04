@@ -1,0 +1,627 @@
+{
+  "version": "2.0",
+  "source": {
+    "workbook": "AI_Data CNC_V1.0.xlsx",
+    "sheet": "HoSo",
+    "image": "ocr_cnc_v1/page-0002.png",
+    "priority": [
+      "exact formula/example code in same row",
+      "five Yes columns as business hints",
+      "requirement notes",
+      "filename examples"
+    ],
+    "principle": "Inputs required to render code come only from requiredForCode. Five metadata are parsed from the final code; a component absent from final code is null and never blocks generation."
+  },
+  "normalization": {
+    "separator": "_",
+    "sequenceWidth": 2,
+    "expiryDateFormat": "YYMMDD",
+    "rejectPlaceholders": true,
+    "rejectDoubleSeparators": true
+  },
+  "parentCode": {
+    "type": "CTR",
+    "pattern": "{DuAn}_{PhapNhan}_{NhaThau}_CTR_{ContractSequence}",
+    "regex": "^(?P<DuAn>[^_]+)_(?P<PhapNhan>[^_]+)_(?P<NhaThau>[^_]+)_CTR_(?P<ContractSequence>\\d{2})$",
+    "childRulePrinciple": "When ParentContractCode is supplied and valid, do not request its component details again."
+  },
+  "documentTypeAliases": {
+    "APL": "PL"
+  },
+  "guaranteeFamily": {
+    "sourceRow": 20,
+    "supportedExecutableTypes": [
+      "TEB"
+    ],
+    "mentionedButUnresolved": [
+      "APB",
+      "PPB",
+      "WRB"
+    ],
+    "note": "Only TEB has an explicit example in HoSo. Other guarantee types require business confirmation before executable patterns are enabled."
+  },
+  "rules": {
+    "COP": {
+      "sourceRows": [
+        3
+      ],
+      "businessName": "Kế hoạch ngân sách dự án",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn"
+      ],
+      "codePattern": "{DuAn}_COP",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "optional"
+      },
+      "sourceNotes": [
+        "Theo dõi version hằng năm."
+      ],
+      "documentTypeCode": "COP",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:COP",
+        "GoiThau": "null",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      }
+    },
+    "MPP": {
+      "sourceRows": [
+        4
+      ],
+      "businessName": "Kế hoạch đấu thầu và mua sắm tổng thể",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn"
+      ],
+      "codePattern": "{DuAn}_MPP",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "optional"
+      },
+      "sourceNotes": [
+        "Theo dõi version hằng năm."
+      ],
+      "documentTypeCode": "MPP",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:MPP",
+        "GoiThau": "null",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      }
+    },
+    "PKG": {
+      "sourceRows": [
+        5
+      ],
+      "businessName": "Hồ sơ thông tin/định danh gói thầu",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "codePattern": "{DuAn}_PKG_{GoiThau}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "documentTypeCode": "PKG",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:PKG",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      }
+    },
+    "TEN": {
+      "sourceRows": [
+        6
+      ],
+      "businessName": "Danh sách nhà thầu/nhà cung cấp",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "codePattern": "{DuAn}_TEN_{GoiThau}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "documentTypeCode": "TEN",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:TEN",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      }
+    },
+    "PTE": {
+      "sourceRows": [
+        7
+      ],
+      "businessName": "Dự toán gói thầu",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "codePattern": "{DuAn}_PTE_{GoiThau}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "documentTypeCode": "PTE",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:PTE",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      }
+    },
+    "INV": {
+      "sourceRows": [
+        9
+      ],
+      "businessName": "Thư mời thầu có phát hành file",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "codePattern": "{DuAn}_INV_{GoiThau}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "optional"
+      },
+      "sourceNotes": [
+        "Nguồn còn câu hỏi mở: gửi chung hay riêng từng nhà thầu; mã ví dụ không có NhaThau."
+      ],
+      "documentTypeCode": "INV",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:INV",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      }
+    },
+    "TDO": {
+      "sourceRows": [
+        10
+      ],
+      "businessName": "Hồ sơ mời thầu",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "codePattern": "{DuAn}_TDO_{GoiThau}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "optional"
+      },
+      "sourceNotes": [
+        "BOQ/điều khoản hợp đồng là mô tả file con trong bộ TDO, không phải rule mã độc lập theo dòng này."
+      ],
+      "documentTypeCode": "TDO",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:TDO",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      }
+    },
+    "BID": {
+      "sourceRows": [
+        12
+      ],
+      "businessName": "Hồ sơ dự thầu",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau",
+        "NhaThau"
+      ],
+      "codePattern": "{DuAn}_BID_{GoiThau}_{NhaThau}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "optional"
+      },
+      "sourceNotes": [
+        "Cột K ghi TDO nhưng ví dụ tên file dùng BID; chọn BID theo loại hồ sơ và ví dụ tên file."
+      ],
+      "documentTypeCode": "BID",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:BID",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      }
+    },
+    "TOR": {
+      "sourceRows": [
+        13
+      ],
+      "businessName": "Biên bản mở thầu",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "codePattern": "{DuAn}_TOR_{GoiThau}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "optional"
+      },
+      "sourceNotes": [
+        "Cột K là mã hồ sơ chuẩn; ví dụ tên file có thứ tự token khác và không được dùng để đổi code pattern."
+      ],
+      "documentTypeCode": "TOR",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:TOR",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      }
+    },
+    "TCQ": {
+      "sourceRows": [
+        14
+      ],
+      "businessName": "Hồ sơ làm rõ hồ sơ dự thầu",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau",
+        "NhaThau"
+      ],
+      "codePattern": "{DuAn}_TCQ_{GoiThau}_{NhaThau}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "documentTypeCode": "TCQ",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:TCQ",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      }
+    },
+    "TEV": {
+      "sourceRows": [
+        15
+      ],
+      "businessName": "Báo cáo lựa chọn nhà thầu",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "codePattern": "{DuAn}_TEV_{GoiThau}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "documentTypeCode": "TEV",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:TEV",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      }
+    },
+    "LOI": {
+      "sourceRows": [
+        16
+      ],
+      "businessName": "Thư thông báo ý định trao thầu",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau",
+        "NhaThau"
+      ],
+      "codePattern": "{DuAn}_LOI_{GoiThau}_{NhaThau}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "documentTypeCode": "LOI",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:LOI",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      }
+    },
+    "LOA": {
+      "sourceRows": [
+        16
+      ],
+      "businessName": "Thông báo trúng thầu",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau",
+        "NhaThau"
+      ],
+      "codePattern": "{DuAn}_LOA_{GoiThau}_{NhaThau}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "documentTypeCode": "LOA",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:LOA",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      }
+    },
+    "CTR": {
+      "sourceRows": [
+        18
+      ],
+      "businessName": "Hợp đồng final",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "PhapNhan",
+        "NhaThau",
+        "ContractSequence"
+      ],
+      "codePattern": "{DuAn}_{PhapNhan}_{NhaThau}_CTR_{ContractSequence}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "sourceNotes": [
+        "GoiThau không có trong mã hợp đồng."
+      ],
+      "documentTypeCode": "CTR",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:CTR",
+        "GoiThau": "null",
+        "PhapNhan": "derive_from_code",
+        "NhaThau": "derive_from_code"
+      }
+    },
+    "IPC": {
+      "sourceRows": [
+        19
+      ],
+      "businessName": "Hồ sơ thanh toán/tạm ứng theo đợt",
+      "mode": "parent_contract",
+      "requiredForCode": [
+        "ParentContractCode",
+        "DocumentSequence"
+      ],
+      "codePattern": "{ParentContractCode}_IPC_{DocumentSequence}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "documentTypeCode": "IPC",
+      "metadataPolicy": {
+        "DuAn": "derive_from_parent",
+        "LoaiTaiLieu": "constant:IPC",
+        "GoiThau": "null",
+        "PhapNhan": "derive_from_parent",
+        "NhaThau": "derive_from_parent"
+      }
+    },
+    "TEB": {
+      "sourceRows": [
+        20
+      ],
+      "businessName": "Bảo lãnh dự thầu",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "NhaThau",
+        "ExpiryDateYYMMDD"
+      ],
+      "codePattern": "{DuAn}_TEB_{NhaThau}_{ExpiryDateYYMMDD}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "sourceNotes": [
+        "Không có GoiThau hoặc PhapNhan trong mã."
+      ],
+      "documentTypeCode": "TEB",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:TEB",
+        "GoiThau": "null",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      }
+    },
+    "VO": {
+      "sourceRows": [
+        21
+      ],
+      "businessName": "Phát sinh/Variation Order",
+      "mode": "parent_contract",
+      "requiredForCode": [
+        "ParentContractCode",
+        "DocumentSequence"
+      ],
+      "codePattern": "{ParentContractCode}_VO_{DocumentSequence}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "documentTypeCode": "VO",
+      "metadataPolicy": {
+        "DuAn": "derive_from_parent",
+        "LoaiTaiLieu": "constant:VO",
+        "GoiThau": "optional_input",
+        "PhapNhan": "derive_from_parent",
+        "NhaThau": "derive_from_parent"
+      }
+    },
+    "PL": {
+      "sourceRows": [
+        22
+      ],
+      "businessName": "Phụ lục hợp đồng",
+      "mode": "parent_contract",
+      "requiredForCode": [
+        "ParentContractCode",
+        "DocumentSequence"
+      ],
+      "codePattern": "{ParentContractCode}_PL_{DocumentSequence}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "documentTypeCode": "PL",
+      "metadataPolicy": {
+        "DuAn": "derive_from_parent",
+        "LoaiTaiLieu": "constant:PL",
+        "GoiThau": "optional_input",
+        "PhapNhan": "derive_from_parent",
+        "NhaThau": "derive_from_parent"
+      }
+    },
+    "FAC": {
+      "sourceRows": [
+        23
+      ],
+      "businessName": "Hồ sơ quyết toán hợp đồng",
+      "mode": "parent_contract",
+      "requiredForCode": [
+        "ParentContractCode"
+      ],
+      "codePattern": "{ParentContractCode}_FAC",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "documentTypeCode": "FAC",
+      "metadataPolicy": {
+        "DuAn": "derive_from_parent",
+        "LoaiTaiLieu": "constant:FAC",
+        "GoiThau": "optional_input",
+        "PhapNhan": "derive_from_parent",
+        "NhaThau": "derive_from_parent"
+      }
+    },
+    "QUO": {
+      "sourceRows": [
+        25
+      ],
+      "businessName": "Báo giá nhà cung cấp",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "NhaThau"
+      ],
+      "codePattern": "{DuAn}_QUO_{NhaThau}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "documentTypeCode": "QUO",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:QUO",
+        "GoiThau": "null",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      }
+    },
+    "COR": {
+      "sourceRows": [
+        26
+      ],
+      "businessName": "So sánh báo giá",
+      "mode": "direct",
+      "requiredForCode": [
+        "DuAn",
+        "NhaThau"
+      ],
+      "codePattern": "{DuAn}_COR_{NhaThau}",
+      "metadataFromCode": true,
+      "filenamePolicy": {
+        "description": "preserve_or_user_supplied",
+        "revision": "not_required_by_source"
+      },
+      "documentTypeCode": "COR",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:COR",
+        "GoiThau": "null",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      }
+    }
+  },
+  "noCodeCases": [
+    {
+      "sourceRow": 8,
+      "businessName": "Gửi thư mời quan tâm chỉ bằng email",
+      "generateCode": false
+    }
+  ],
+  "unresolvedCases": [
+    {
+      "sourceRow": 11,
+      "businessName": "Phát hành hồ sơ thầu",
+      "reason": "Uses tender dossier files above; no independent code."
+    },
+    {
+      "sourceRow": 17,
+      "businessName": "Soạn hợp đồng và thương thảo",
+      "reason": "No Yes flags or valid code."
+    },
+    {
+      "sourceRow": 24,
+      "businessName": "Nhận yêu cầu mua hàng",
+      "reason": "No document type or code."
+    },
+    {
+      "sourceRow": 27,
+      "businessName": "Hợp đồng mua hàng/cung ứng",
+      "reason": "Says follow CTR and example contains PhapNhan, but row omits PhapNhan flag. Use CTR only when user supplies Parent/PhapNhan and sequence."
+    }
+  ]
+}

@@ -3,7 +3,7 @@
  * Render document pages to images for agent-side OCR.
  *
  * This script does not call a vision API. It prepares page images and a
- * manifest so the active Iris Agent model can read the images directly.
+ * manifest so the active TTG OS model can read the images directly.
  */
 
 import { spawn } from 'node:child_process'

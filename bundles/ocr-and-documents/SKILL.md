@@ -1,8 +1,8 @@
 ---
 name: ocr-and-documents
-description: "Render PDF/image files into page images so Iris Agent can OCR them with the configured Iris OCR vision tool."
+description: "Render PDF/image files into page images so TTG OS can OCR them with the configured Iris OCR vision tool."
 version: 3.0.0
-author: Iris Agent
+author: TTG OS
 license: MIT
 platforms: [linux, macos, windows]
 metadata:

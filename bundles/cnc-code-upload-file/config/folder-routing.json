@@ -1,0 +1,38 @@
+{
+  "version": "1.0",
+  "template": "cnc-create-package/config/package-folder-template.json",
+  "routingByDocumentType": {
+    "COP": "01. PRE-TENDER/01. COP",
+    "MPP": "01. PRE-TENDER/02. MPP",
+    "PKG": "01. PRE-TENDER/03. PKG",
+    "TEN": "01. PRE-TENDER/04. VEN",
+    "PTE": "01. PRE-TENDER/05. PTE",
+
+    "INV": "02. TENDERING/01. INV",
+    "TDO": "02. TENDERING/02. ITB",
+    "BOQ": "02. TENDERING/03. BOQ",
+    "BID": "02. TENDERING/04. BID",
+    "TOR": "02. TENDERING/05. BOR",
+    "TCQ": "02. TENDERING/06. CLR",
+    "TEV": "02. TENDERING/07. BEV",
+    "LOI": "02. TENDERING/08. LOI",
+    "LOA": "02. TENDERING/09. LOA",
+
+    "CTR": "03. CONTRACT/01. CTR",
+    "APL": "03. CONTRACT/02. APL",
+
+    "IPC": "04. POST-CONTRACT/01. IPC",
+    "VO": "04. POST-CONTRACT/02. VO",
+    "FAC": "04. POST-CONTRACT/03. FAC",
+    "TEB": "04. POST-CONTRACT/04. GUB",
+    "APB": "04. POST-CONTRACT/05. GUP",
+    "PPB": "04. POST-CONTRACT/06. GUC",
+    "WRB": "04. POST-CONTRACT/07. GUW"
+  },
+  "fallback": {
+    "unclassified": "05. REFERENCE/03. ADMIN",
+    "legacySource": "05. REFERENCE/01. LEGACY-SOURCE",
+    "drawing": "05. REFERENCE/02. DRAWINGS"
+  },
+  "requireUserConfirmationForFallback": true
+}

@@ -1,0 +1,11 @@
+{
+  "version": "2.0",
+  "siteUrl": "https://ttgvncom.sharepoint.com/teams/ai2",
+  "libraryName": "AIT DATA",
+  "packageRootPath": "90 TENDER DEMO",
+  "folderNameSource": "user_input_verbatim",
+  "trimOuterWhitespace": true,
+  "autoNormalizeFolderName": false,
+  "invalidCharacters": ["\"", "*", ":", "<", ">", "?", "/", "\\", "|"],
+  "forbiddenNames": ["Forms"]
+}

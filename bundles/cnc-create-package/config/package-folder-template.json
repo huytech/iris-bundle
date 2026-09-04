@@ -1,0 +1,46 @@
+{
+  "version": "2.0",
+  "status": "CONFIRMED_FROM_DEMO",
+  "source": {
+    "siteUrl": "https://ttgvncom.sharepoint.com/teams/ai2",
+    "libraryName": "AIT DATA",
+    "samplePath": "/90 TENDER DEMO/017A. M02_PKG-ELV01_IBS_STANDARD"
+  },
+  "folders": [
+    {"order": 1, "path": "01. PRE-TENDER"},
+    {"order": 2, "path": "01. PRE-TENDER/01. COP"},
+    {"order": 3, "path": "01. PRE-TENDER/02. MPP"},
+    {"order": 4, "path": "01. PRE-TENDER/03. PKG"},
+    {"order": 5, "path": "01. PRE-TENDER/04. VEN"},
+    {"order": 6, "path": "01. PRE-TENDER/05. PTE"},
+
+    {"order": 7, "path": "02. TENDERING"},
+    {"order": 8, "path": "02. TENDERING/01. INV"},
+    {"order": 9, "path": "02. TENDERING/02. ITB"},
+    {"order": 10, "path": "02. TENDERING/03. BOQ"},
+    {"order": 11, "path": "02. TENDERING/04. BID"},
+    {"order": 12, "path": "02. TENDERING/05. BOR"},
+    {"order": 13, "path": "02. TENDERING/06. CLR"},
+    {"order": 14, "path": "02. TENDERING/07. BEV"},
+    {"order": 15, "path": "02. TENDERING/08. LOI"},
+    {"order": 16, "path": "02. TENDERING/09. LOA"},
+
+    {"order": 17, "path": "03. CONTRACT"},
+    {"order": 18, "path": "03. CONTRACT/01. CTR"},
+    {"order": 19, "path": "03. CONTRACT/02. APL"},
+
+    {"order": 20, "path": "04. POST-CONTRACT"},
+    {"order": 21, "path": "04. POST-CONTRACT/01. IPC"},
+    {"order": 22, "path": "04. POST-CONTRACT/02. VO"},
+    {"order": 23, "path": "04. POST-CONTRACT/03. FAC"},
+    {"order": 24, "path": "04. POST-CONTRACT/04. GUB"},
+    {"order": 25, "path": "04. POST-CONTRACT/05. GUP"},
+    {"order": 26, "path": "04. POST-CONTRACT/06. GUC"},
+    {"order": 27, "path": "04. POST-CONTRACT/07. GUW"},
+
+    {"order": 28, "path": "05. REFERENCE"},
+    {"order": 29, "path": "05. REFERENCE/01. LEGACY-SOURCE"},
+    {"order": 30, "path": "05. REFERENCE/02. DRAWINGS"},
+    {"order": 31, "path": "05. REFERENCE/03. ADMIN"}
+  ]
+}

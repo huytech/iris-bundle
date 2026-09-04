@@ -1,0 +1,65 @@
+{
+  "version": "2.0",
+  "source": {
+    "type": "local_folder",
+    "pathSource": "user_input",
+    "recursiveDefault": true,
+    "followSymlinks": false,
+    "includeHidden": false,
+    "excludePatterns": ["~$*", "*.tmp", "*.part", "*.crdownload", ".DS_Store", "Thumbs.db"]
+  },
+  "staging": {
+    "enabled": true,
+    "rootPath": ".cnc-staging",
+    "copyOnly": true,
+    "renameCopyOnly": true,
+    "calculateSha256": true,
+    "verifyCopyHash": true,
+    "cleanupAfterSuccess": true,
+    "keepAfterFailure": true
+  },
+  "sharePoint": {
+    "siteUrl": "https://ttgvncom.sharepoint.com/teams/ai2",
+    "libraryName": "AIT DATA",
+    "destinationRootPath": "90 TENDER DEMO",
+    "packageFolderNameSource": "user_input_verbatim"
+  },
+  "confirmation": {
+    "mandatory": true,
+    "showSourcePath": true,
+    "showDetectedOldPrefix": false,
+    "showAgentOldPrefixDecision": true,
+    "showDocumentCode": true,
+    "showNewFileName": true,
+    "showDestinationPath": true,
+    "showMetadata": true,
+    "showCollisionStatus": true,
+    "invalidateOnPlanChange": true
+  },
+  "collisionPolicy": {
+    "existingDestination": "stop_and_ask",
+    "autoOverwrite": false,
+    "autoRename": false
+  },
+  "verification": {
+    "sourceStillExists": true,
+    "sourceHashEqualsStaging": true,
+    "destinationExists": true,
+    "destinationFileName": true,
+    "destinationSize": true,
+    "destinationHashWhenAvailable": true,
+    "destinationMetadata": true
+  },
+  "metadataColumns": {
+    "DuAn": "DuAn",
+    "LoaiTaiLieu": "LoaiTaiLieu",
+    "GoiThau": "GoiThau",
+    "PhapNhan": "PhapNhan",
+    "NhaThau": "NhaThau"
+  },
+  "dependencies": {
+    "codeGeneratorSkill": "cnc-generate-document-code",
+    "packageFolderSkill": "cnc-create-package",
+    "localPipelineScript": "scripts/local_file_pipeline.py"
+  }
+}

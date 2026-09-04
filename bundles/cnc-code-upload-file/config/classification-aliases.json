@@ -1,0 +1,5 @@
+{
+  "deprecated": true,
+  "movedTo": "../../cnc-generate-document-code/config/classification-aliases.json",
+  "note": "Skill upload không sử dụng file này."
+}

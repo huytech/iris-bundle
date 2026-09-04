@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "siteUrl": "https://ttgvncom.sharepoint.com/teams/InformationTechnology",
+  "activeStatus": "Active",
+  "lists": {
+    "projects": {"name": "CNC_MD_Projects", "codeField": "ProjectCode", "nameField": "ProjectName"},
+    "packageGroups": {"name": "CNC_MD_PackageGroups", "codeField": "PackageGroupCode", "nameField": "PackageGroupName"},
+    "packages": {"name": "CNC_MD_Packages", "codeField": "PackageCode", "nameField": "PackageName"},
+    "documentTypes": {"name": "CNC_MD_DocumentTypes", "codeField": "DocumentTypeCode", "nameField": "DocumentTypeName"},
+    "legalEntities": {"name": "CNC_MD_LegalEntities", "codeField": "LegalEntityCode", "nameField": "LegalEntityName"},
+    "contractors": {"name": "CNC_MD_Contractors", "codeField": "ContractorCode", "nameField": "ContractorName"}
+  }
+}
