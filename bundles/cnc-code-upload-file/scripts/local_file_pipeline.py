@@ -246,6 +246,12 @@ def _read(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+def unwrap_code_results(value: dict) -> dict:
+    if value.get("status") == "batch" and isinstance(value.get("results"), dict):
+        return value["results"]
+    return value
+
+
 def _write(data, path=None):
     text = json.dumps(data, ensure_ascii=False, indent=2)
     if path:
@@ -284,7 +290,7 @@ def main():
             out = scan_folder(a.source, not a.no_recursive)
         elif a.cmd == "plan":
             routes = _read(a.routing).get("routingByDocumentType", _read(a.routing))
-            out = build_plan(_read(a.scan), _read(a.codes), routes, a.package_folder)
+            out = build_plan(_read(a.scan), unwrap_code_results(_read(a.codes)), routes, a.package_folder)
         elif a.cmd == "confirm":
             out = confirm_plan(_read(a.plan))
         elif a.cmd == "stage":

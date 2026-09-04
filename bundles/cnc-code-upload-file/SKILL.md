@@ -15,10 +15,9 @@ Không rename/move/xóa file nguồn. Không tự phân loại hoặc tạo mã.
 
 1. `config/sharepoint.json`
 2. `config/folder-routing.json`
-3. `references/local-pipeline.md`
-4. `references/filename-normalization.md`
-5. `references/metadata-mapping.md`
-6. `references/safety-rules.md`
+3. `references/safety-rules.md`
+
+Chỉ đọc reference khi đến bước cần nó: `references/filename-normalization.md` lúc quyết định filename, `references/metadata-mapping.md` lúc lập plan metadata, và `references/local-pipeline.md` trước stage/cleanup. Không nạp tất cả reference vào context từ đầu.
 
 Nếu SharePoint `libraryName` hoặc `destinationRootPath` còn `__REQUIRED__`, hỏi user; không tự đoán.
 
@@ -58,9 +57,15 @@ python scripts/local_file_pipeline.py scan --source "<sourceFolderPath>" --outpu
 
 Ghi nhận relative path, size, modified time và SHA-256. Không sửa nguồn.
 
-### 2. Phân loại và tạo mã
+### 2. Phân loại và tạo mã theo batch
 
-Với từng file, gọi `cnc-generate-document-code`. Gom mọi câu hỏi thiếu/mơ hồ trong một bảng. Không tự sửa output của skill tạo mã.
+Load `cnc-generate-document-code` một lần cho toàn bộ batch. Phân loại tất cả file trong một lượt, đọc master data Active một lần, rồi tạo một `code-input.json` chứa `items[]`; mỗi item dùng `relativePath` làm `id`. Gọi engine một lần:
+
+```bash
+python ../cnc-generate-document-code/scripts/document_code_engine.py --input-file code-input.json > codes.json
+```
+
+Kết quả batch có `results` keyed theo `relativePath`; `local_file_pipeline.py plan` đọc trực tiếp envelope này. Gom mọi câu hỏi thiếu/mơ hồ trong một bảng cho toàn batch. Không gọi lại skill/engine riêng từng file và không tự sửa output của engine.
 
 ### 3. Resolve destination
 

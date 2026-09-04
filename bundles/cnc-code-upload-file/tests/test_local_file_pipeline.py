@@ -84,6 +84,16 @@ def test_plan_detects_collision_before_staging(tmp_path):
     assert plan["state"] == "blocked"
 
 
+def test_plan_accepts_batch_engine_result_envelope(tmp_path):
+    p = load_module()
+    scan = {"sourceRoot": str(tmp_path), "files": [{"relativePath": "a.pdf", "size": 1, "sha256": "a" * 64}]}
+    result = {"status": "ready", "DocumentCode": "M01_COP", "components": {"DuAn": "M01", "LoaiTaiLieu": "COP", "GoiThau": None, "PhapNhan": None, "NhaThau": None}}
+    batch = {"status": "batch", "results": {"a.pdf": result}, "summary": {"total": 1, "ready": 1}}
+    plan = p.build_plan(scan, p.unwrap_code_results(batch), {"COP": "01. PRE-TENDER/01. COP"}, "1xx")
+    assert plan["files"][0]["DocumentCode"] == "M01_COP"
+    assert plan["state"] == "planned"
+
+
 def test_stage_requires_confirmed_plan_and_preserves_source(tmp_path):
     p = load_module()
     src = tmp_path / "src"

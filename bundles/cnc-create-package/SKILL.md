@@ -57,7 +57,7 @@ Script xử lý:
 
 - Resolve site/library từ config.
 - Validate tên package theo config.
-- Preview folder đã có/còn thiếu.
+- Preview folder đã có/còn thiếu bằng Graph batch read, tối đa 20 path mỗi request.
 - Tạo folder cha trước, con sau với conflictBehavior `fail`.
 - Đọc lại toàn bộ cây để verify.
 

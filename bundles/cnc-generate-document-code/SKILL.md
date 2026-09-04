@@ -13,14 +13,11 @@ Skill không đổi tên, upload/copy, tạo folder hoặc cập nhật master d
 
 ## Đọc trước khi xử lý
 
-1. `config/document-code-matrix.json` — nguồn quy tắc runtime cao nhất, biên soạn từ toàn bộ cột/note/ví dụ sheet `HoSo`.
-2. `config/master-data.json`
-3. `config/classification-aliases.json`
-4. `references/classification-policy.md`
-5. `references/output-schema.md`
-6. `references/safety-rules.md`
-7. `references/document-code-rules.md` — bản đọc nhanh; matrix luôn thắng khi khác.
-8. Iris Wiki chỉ để giải thích; không được ghi đè matrix hoặc master data.
+1. `references/classification-policy.md`
+2. `references/output-schema.md`
+3. `references/safety-rules.md`
+
+Chỉ đọc `config/classification-aliases.json` khi tên loại hồ sơ cần alias. Không nạp `config/document-code-matrix.json` vào model context: Python engine tự đọc matrix, là nguồn quy tắc runtime cao nhất. `config/master-data.json` chỉ mô tả vị trí master data; đọc các bản ghi Active liên quan một lần cho toàn batch. `references/document-code-rules.md` là bản tra nhanh khi cần giải thích. Iris Wiki chỉ để giải thích; không được ghi đè matrix hoặc master data.
 
 ## Nguồn dữ liệu
 
@@ -72,10 +69,32 @@ Ví dụ sai cần chặn:
 - Agent không được tự tạo `R02_TTDN_CTC_CTR_01` chỉ vì matrix có ví dụ `M01_TTDN_CTC_CTR_01_IPC_01`.
 - Kết quả đúng là `needs_user_input`, hỏi `ParentContractCode` hoặc `PhapNhan` của hợp đồng.
 
+## Batch mặc định
+
+Với nhiều file, phân loại toàn bộ trong một lượt và gọi engine một lần bằng file UTF-8 để tránh command-line quoting:
+
+```json
+{
+  "items": [
+    {
+      "id": "relative/path.pdf",
+      "documentTypeCode": "FAC",
+      "values": {"ParentContractCode": "R02_TTDN_CTC_CTR_01"}
+    }
+  ]
+}
+```
+
+```bash
+python scripts/document_code_engine.py --input-file code-input.json > codes.json
+```
+
+Output giữ kết quả riêng theo `results[id]` và có `summary` theo status. Input đơn qua `--input` hoặc stdin vẫn được hỗ trợ cho một hồ sơ.
+
 ## Quy trình bắt buộc
 
 1. Nhận tên/path/metadata/nội dung và yêu cầu user.
-2. Đọc master data liên quan một lần cho mỗi batch.
+2. Đọc master data liên quan một lần cho mỗi batch; không đọc lại theo từng file.
 3. Phân loại một `documentTypeCode`; ghi evidence/confidence và không trộn ví dụ giữa các dòng nghiệp vụ.
 4. Tra duy nhất `rules[documentTypeCode]` trong matrix.
 5. Nếu không có executable rule, trả `unsupported`; không tự sáng tác pattern.
@@ -83,13 +102,13 @@ Ví dụ sai cần chặn:
 7. Với mã con hợp đồng, ưu tiên `ParentContractCode`; không tái dựng mã cha nếu user đã cung cấp mã cha hợp lệ.
 8. Xác thực các mã master mà rule trực tiếp sử dụng.
 9. Nếu thiếu input, gom vào `missingFields`; batch thì hỏi một lần.
-10. Gọi engine:
+10. Gọi engine một lần cho batch:
 
 ```bash
-python scripts/document_code_engine.py --input '<json>'
+python scripts/document_code_engine.py --input-file code-input.json
 ```
 
-Hoặc truyền JSON qua stdin. Không tự nối mã bằng LLM.
+Một hồ sơ vẫn có thể truyền JSON qua `--input` hoặc stdin. Không tự nối mã bằng LLM.
 11. Chỉ chấp nhận output `status=ready` từ engine.
 12. Trả đúng schema, gồm `DocumentCode`, `components`, `runtimeFields`, `inheritedFields`, `validation`, evidence và warnings.
 

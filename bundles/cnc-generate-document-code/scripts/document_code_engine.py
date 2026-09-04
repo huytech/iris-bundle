@@ -3,6 +3,9 @@
 
 Input JSON example:
 {"documentTypeCode":"FAC","values":{"ParentContractCode":"M01_TTDN_CTC_CTR_01"}}
+
+Batch input example:
+{"items":[{"id":"file-a.pdf","documentTypeCode":"FAC","values":{"ParentContractCode":"M01_TTDN_CTC_CTR_01"}}]}
 """
 from __future__ import annotations
 import argparse
@@ -139,6 +142,28 @@ def generate(document_type: str, values: dict, matrix: dict) -> dict:
         return {"status": "invalid", "documentTypeCode": canonical, "DocumentCode": None,
                 "missingFields": [], "errors": [str(exc)]}
 
+def generate_payload(payload: dict, matrix: dict) -> dict:
+    items = payload.get("items")
+    if items is None:
+        return generate(payload["documentTypeCode"], payload.get("values", {}), matrix)
+    if not isinstance(items, list):
+        raise CodeEngineError("items must be an array")
+    results = {}
+    counts = {}
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            raise CodeEngineError(f"items[{index}] must be an object")
+        item_id = str(item.get("id", "")).strip()
+        if not item_id:
+            raise CodeEngineError(f"items[{index}].id is required")
+        if item_id in results:
+            raise CodeEngineError(f"Duplicate batch item id: {item_id}")
+        result = generate(item["documentTypeCode"], item.get("values", {}), matrix)
+        results[item_id] = result
+        status = result["status"]
+        counts[status] = counts.get(status, 0) + 1
+    return {"status": "batch", "results": results, "summary": {"total": len(items), **counts}}
+
 def validate_result(rule: dict, code: str, metadata: dict, values: dict, matrix: dict) -> dict:
     errors = []
     if PLACEHOLDER_RE.search(code): errors.append("placeholder remains")
@@ -236,10 +261,18 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--matrix", default=str(Path(__file__).parents[1] / "config" / "document-code-matrix.json"))
     parser.add_argument("--input", help="JSON object; reads stdin when omitted")
+    parser.add_argument("--input-file", help="UTF-8 JSON input file; avoids command-line quoting for batches")
     args = parser.parse_args()
-    payload = json.loads(args.input) if args.input else json.load(sys.stdin)
-    result = generate(payload["documentTypeCode"], payload.get("values", {}), load_matrix(args.matrix))
+    if args.input and args.input_file:
+        parser.error("--input and --input-file are mutually exclusive")
+    if args.input_file:
+        payload = json.loads(Path(args.input_file).read_text(encoding="utf-8"))
+    else:
+        payload = json.loads(args.input) if args.input else json.load(sys.stdin)
+    result = generate_payload(payload, load_matrix(args.matrix))
     print(json.dumps(result, ensure_ascii=False, indent=2))
+    if result["status"] == "batch":
+        return 0 if not any(item["status"] == "invalid" for item in result["results"].values()) else 2
     return 0 if result["status"] in {"ready", "needs_user_input", "unsupported"} else 2
 
 if __name__ == "__main__":

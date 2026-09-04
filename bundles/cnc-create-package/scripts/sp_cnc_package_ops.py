@@ -26,6 +26,7 @@ from pathlib import Path
 GRAPH = "https://graph.microsoft.com/v1.0"
 DEFAULT_TOKEN_PATH = Path.home() / "AppData" / "Roaming" / "ttg-os" / "ttg-os-home" / "microsoft365" / "delegated-token.json"
 INVALID_NAME_CHARS = set('"*:<>?/\\|')
+BATCH_LIMIT = 20
 
 
 class SpError(RuntimeError):
@@ -99,6 +100,35 @@ def item_by_path(drive_id: str, path: str):
         raise
 
 
+def items_by_path(drive_id: str, paths: list[str]):
+    found = {}
+    for start in range(0, len(paths), BATCH_LIMIT):
+        chunk = paths[start:start + BATCH_LIMIT]
+        requests = [
+            {"id": str(index), "method": "GET", "url": f"/drives/{drive_id}/root:/{enc_path(path)}"}
+            for index, path in enumerate(chunk)
+        ]
+        try:
+            responses = req("POST", f"{GRAPH}/$batch", body={"requests": requests}).get("responses", [])
+        except SpError:
+            for path in chunk:
+                found[path] = item_by_path(drive_id, path)
+            continue
+        by_id = {str(response.get("id")): response for response in responses}
+        for index, path in enumerate(chunk):
+            response = by_id.get(str(index))
+            if response is None:
+                raise SpError(f"Graph batch omitted response for {path}")
+            status = response.get("status")
+            if status == 200:
+                found[path] = response.get("body")
+            elif status == 404:
+                found[path] = None
+            else:
+                found[path] = item_by_path(drive_id, path)
+    return found
+
+
 def create_folder(drive_id: str, parent_path: str, name: str):
     url = f"{GRAPH}/drives/{drive_id}/root:/{enc_path(parent_path)}:/children" if parent_path else f"{GRAPH}/drives/{drive_id}/root/children"
     body = {"name": name, "folder": {}, "@microsoft.graph.conflictBehavior": "fail"}
@@ -140,9 +170,9 @@ def preview(config: dict, template: dict, package_name: str):
     drive = resolve_drive(config["siteUrl"], config["libraryName"])
     root = config["packageRootPath"].strip("/")
     paths = required_paths(root, package, template)
-    existing, missing = [], []
-    for path in paths:
-        (existing if item_by_path(drive["id"], path) else missing).append(path)
+    items = items_by_path(drive["id"], paths)
+    existing = [path for path in paths if items[path]]
+    missing = [path for path in paths if not items[path]]
     return {
         "siteUrl": config["siteUrl"],
         "libraryName": config["libraryName"],
@@ -161,9 +191,10 @@ def create(config: dict, template: dict, package_name: str):
     before = preview(config, template, package_name)
     drive_id = before["driveId"]
     created, already_existing = [], []
+    missing = set(before["missing"])
     # Iterate required paths in template order. Parents appear before children.
     for path in required_paths(before["packageRootPath"], before["packageFolderName"], template):
-        if item_by_path(drive_id, path):
+        if path not in missing:
             already_existing.append(path)
             continue
         parent, name = split_parent(path)

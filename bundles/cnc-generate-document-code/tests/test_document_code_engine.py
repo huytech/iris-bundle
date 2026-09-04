@@ -67,6 +67,30 @@ def test_missing_and_unsupported():
     assert engine.generate("BOQ", {}, MATRIX)["status"] == "unsupported"
     assert engine.generate("PPB", {}, MATRIX)["status"] == "unsupported"
 
+def test_batch_matches_individual_generation_and_summarizes_statuses():
+    payload = {"items": [
+        {"id": "fac.pdf", "documentTypeCode": "FAC", "values": {"ParentContractCode": "R02_TTDN_CTC_CTR_01"}},
+        {"id": "teb.pdf", "documentTypeCode": "TEB", "values": {"DuAn": "M01", "NhaThau": "CTC"}},
+        {"id": "boq.xlsx", "documentTypeCode": "BOQ", "values": {}},
+    ]}
+    batch = engine.generate_payload(payload, MATRIX)
+    assert batch["status"] == "batch"
+    assert batch["results"]["fac.pdf"] == engine.generate("FAC", payload["items"][0]["values"], MATRIX)
+    assert batch["results"]["teb.pdf"]["status"] == "needs_user_input"
+    assert batch["results"]["boq.xlsx"]["status"] == "unsupported"
+    assert batch["summary"] == {"total": 3, "ready": 1, "needs_user_input": 1, "unsupported": 1}
+
+def test_batch_rejects_duplicate_ids():
+    payload = {"items": [
+        {"id": "same.pdf", "documentTypeCode": "COP", "values": {"DuAn": "M01"}},
+        {"id": "same.pdf", "documentTypeCode": "COP", "values": {"DuAn": "M02"}},
+    ]}
+    try:
+        engine.generate_payload(payload, MATRIX)
+        assert False, "duplicate ids must fail"
+    except engine.CodeEngineError as error:
+        assert "Duplicate batch item id" in str(error)
+
 def test_invalid_parent_and_placeholders_rejected():
     r=engine.generate("FAC", {"ParentContractCode":"R02_TTDN_CTC_CTR_[STT]"}, MATRIX)
     assert r["status"] == "invalid" and r["DocumentCode"] is None

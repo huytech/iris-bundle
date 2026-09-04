@@ -26,6 +26,7 @@ from pathlib import Path
 GRAPH = "https://graph.microsoft.com/v1.0"
 DEFAULT_TOKEN_PATH = Path.home() / "AppData" / "Roaming" / "ttg-os" / "ttg-os-home" / "microsoft365" / "delegated-token.json"
 METADATA_COLUMNS = ("DuAn", "LoaiTaiLieu", "GoiThau", "PhapNhan", "NhaThau")
+BATCH_LIMIT = 20
 
 
 class SpError(RuntimeError):
@@ -122,6 +123,37 @@ def item_by_path(drive_id: str, path: str):
         raise
 
 
+def items_by_path(drive_id: str, paths: list[str]):
+    found = {}
+    for start in range(0, len(paths), BATCH_LIMIT):
+        chunk = paths[start:start + BATCH_LIMIT]
+        requests = [
+            {"id": str(index), "method": "GET", "url": f"/drives/{drive_id}/root:/{enc_path(path)}"}
+            for index, path in enumerate(chunk)
+        ]
+        try:
+            responses = req("POST", f"{GRAPH}/$batch", body={"requests": requests}).get("responses", [])
+        except SpError:
+            for path in chunk:
+                found[path] = item_by_path(drive_id, path)
+            continue
+        by_id = {str(response.get("id")): response for response in responses}
+        for index, path in enumerate(chunk):
+            response = by_id.get(str(index))
+            if response is None:
+                raise SpError(f"Graph batch omitted response for {path}")
+            status = response.get("status")
+            if status == 200:
+                found[path] = response.get("body")
+            elif status == 404:
+                found[path] = None
+            else:
+                # Preserve the original single-request behavior and diagnostics
+                # for throttling or service errors on one batch member.
+                found[path] = item_by_path(drive_id, path)
+    return found
+
+
 def upload_file(drive_id: str, dest_path: str, local_path: str):
     data = Path(local_path).read_bytes()
     url = f"{GRAPH}/drives/{drive_id}/root:/{enc_path(dest_path)}:/content"
@@ -147,11 +179,11 @@ def check_collisions(config: dict, plan: dict):
     root = config["destinationRootPath"]
     collisions = []
     checked = []
-    for entry in plan.get("files", []):
-        if entry.get("state") not in {"ready", "staged"}:
-            continue
-        dest = destination_path(root, entry)
-        item = item_by_path(drive["id"], dest)
+    entries = [entry for entry in plan.get("files", []) if entry.get("state") in {"ready", "staged"}]
+    destinations = [destination_path(root, entry) for entry in entries]
+    items = items_by_path(drive["id"], destinations)
+    for entry, dest in zip(entries, destinations):
+        item = items[dest]
         checked.append({"sourceRelativePath": entry.get("sourceRelativePath"), "destination": dest, "exists": bool(item)})
         if item:
             collisions.append({"sourceRelativePath": entry.get("sourceRelativePath"), "destination": dest, "itemId": item.get("id"), "webUrl": item.get("webUrl")})

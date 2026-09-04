@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-04T08:43:21.158Z",
+  "generatedAt": "2026-09-04T09:33:23.595Z",
   "repository": "https://github.com/huytech/iris-bundle.git",
   "branch": "main",
   "rawBaseUrl": "https://raw.githubusercontent.com/huytech/iris-bundle/main",
@@ -1904,7 +1904,7 @@
       "id": "cnc-code-upload-file",
       "name": "CNC Code and Upload File",
       "type": "skill",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "description": "Preview, stage, code, upload, and verify CNC files in SharePoint.",
       "entry": "SKILL.md",
       "root": "bundles/cnc-code-upload-file",
@@ -1959,27 +1959,33 @@
         },
         {
           "path": "scripts/local_file_pipeline.py",
-          "size": 12803,
-          "sha256": "67c3de601ab73cc43b1c4288d0327d057557399fbfee41b46df42afe8d99cb06",
+          "size": 13003,
+          "sha256": "a2ca25c0effdf8acc739135219c132f9ba70c05e100d0c4ad1a3d8af0c0b0890",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-code-upload-file/scripts/local_file_pipeline.py"
         },
         {
           "path": "scripts/sp_cnc_upload_ops.py",
-          "size": 9704,
-          "sha256": "a323e230ba0eb8c7d4aa03d92b601291c1d530d101851d83c27b0c2de5beb8aa",
+          "size": 11131,
+          "sha256": "32e55b26d866628b071985e05fe208322b96580f9a3688d304efe7110868f37e",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-code-upload-file/scripts/sp_cnc_upload_ops.py"
         },
         {
           "path": "SKILL.md",
-          "size": 9262,
-          "sha256": "ee0c24298c64ec1d7653e65c026fbe6dbeb6947c06fa3ecfd867e95799159198",
+          "size": 10000,
+          "sha256": "b6469aa838bd3c96753328208a63a6b7d7ceadcb74dcb31171c912634f1c6814",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-code-upload-file/SKILL.md"
         },
         {
           "path": "tests/test_local_file_pipeline.py",
-          "size": 6085,
-          "sha256": "41f6d03e64e2e78de9a699ad77213dfc156f7cef72866d40bfe24a0d28fc30ca",
+          "size": 6742,
+          "sha256": "9b617cee92d8fdfc523de707a8c0aa8c7a896c289e4e847d434505bc3580435e",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-code-upload-file/tests/test_local_file_pipeline.py"
+        },
+        {
+          "path": "tests/test_sp_cnc_upload_ops.py",
+          "size": 2263,
+          "sha256": "ca0268677f347749bd3a68986986c32273b22a9ac4a4f7b8dfcd73d9d49267e7",
+          "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-code-upload-file/tests/test_sp_cnc_upload_ops.py"
         }
       ]
     },
@@ -1987,7 +1993,7 @@
       "id": "cnc-create-package",
       "name": "CNC Create Package",
       "type": "skill",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "description": "Preview, create, and verify CNC package folder trees in SharePoint.",
       "entry": "SKILL.md",
       "root": "bundles/cnc-create-package",
@@ -2012,15 +2018,21 @@
         },
         {
           "path": "scripts/sp_cnc_package_ops.py",
-          "size": 7855,
-          "sha256": "64c117d48e98e4c1802ab421ae8a44b4787427635dcbcd557d723238ef00d0cb",
+          "size": 9089,
+          "sha256": "7bc15bdfd3480ab4c3177bc7f712bf2f22ab2478d9e3db6604ba1f44c5abcf72",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-create-package/scripts/sp_cnc_package_ops.py"
         },
         {
           "path": "SKILL.md",
-          "size": 4668,
-          "sha256": "e4b4317c8cbd249bd7b875a0edd9f3a6b568d3bce02489c2838a13eb726b49c4",
+          "size": 4725,
+          "sha256": "599df89dddfef391c861cba0f4169ccd8a64087e854faa0bbd649ce8fa41aa7d",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-create-package/SKILL.md"
+        },
+        {
+          "path": "tests/test_sp_cnc_package_ops.py",
+          "size": 2540,
+          "sha256": "ad400221f8de3facc755b5ecb4971b9a098c15c4510fee1cdd58d1364555eec9",
+          "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-create-package/tests/test_sp_cnc_package_ops.py"
         }
       ]
     },
@@ -2028,7 +2040,7 @@
       "id": "cnc-generate-document-code",
       "name": "CNC Generate Document Code",
       "type": "skill",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "description": "Classify CNC documents and generate deterministic document codes and metadata.",
       "entry": "SKILL.md",
       "root": "bundles/cnc-generate-document-code",
@@ -2077,20 +2089,20 @@
         },
         {
           "path": "scripts/document_code_engine.py",
-          "size": 11619,
-          "sha256": "12192929bb7343fa80ef5b303c3e04941906dde2ced251f5b8d2db4bf1bfe129",
+          "size": 13215,
+          "sha256": "ab585f9474b65213e69b4263e1c50e63b62e9ea44a953332e83420012b99e945",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-generate-document-code/scripts/document_code_engine.py"
         },
         {
           "path": "SKILL.md",
-          "size": 5568,
-          "sha256": "b4fc65850e66da249a22848bcc1af0d7be0352777506da2e7952c24612d6d7a7",
+          "size": 6425,
+          "sha256": "e61e066aaae16663802347d31621f42c6e68c0ca1889c154c0c868af76d91076",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-generate-document-code/SKILL.md"
         },
         {
           "path": "tests/test_document_code_engine.py",
-          "size": 5012,
-          "sha256": "ee9144e1ac051ab8efaf6010d8a28880724a869de2776cddf9c4f590e8e54aa0",
+          "size": 6270,
+          "sha256": "9f5a61be54f680c838d669c0cfd611534e8ca14fabbe38f190f427703d217f98",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-generate-document-code/tests/test_document_code_engine.py"
         },
         {
