@@ -12,7 +12,12 @@ import argparse
 import json
 import re
 import sys
+import unicodedata
 from pathlib import Path
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
 
 META_FIELDS = ("DuAn", "LoaiTaiLieu", "GoiThau", "PhapNhan", "NhaThau")
 PLACEHOLDER_RE = re.compile(r"\{[^{}]+\}|\[[^\[\]]+\]")
@@ -24,6 +29,19 @@ class CodeEngineError(ValueError):
 def load_matrix(path: str | Path) -> dict:
     with open(path, encoding="utf-8") as f:
         return json.load(f)
+
+def _search_key(value: str) -> str:
+    text = unicodedata.normalize("NFD", str(value).casefold()).replace("đ", "d")
+    return " ".join("".join(ch for ch in text if unicodedata.category(ch) != "Mn").split())
+
+def resolve_document_type(query: str, matrix: dict, aliases: dict) -> str | None:
+    key = _search_key(query)
+    matches = []
+    for code, rule in matrix.get("rules", {}).items():
+        terms = [code, rule.get("businessName", ""), *aliases.get("aliases", {}).get(code, [])]
+        if any(_search_key(term) == key for term in terms):
+            matches.append(code)
+    return matches[0] if len(matches) == 1 else None
 
 def normalize_code_token(value, field: str) -> str:
     if value is None:
@@ -143,6 +161,8 @@ def generate(document_type: str, values: dict, matrix: dict) -> dict:
                 "missingFields": [], "errors": [str(exc)]}
 
 def generate_payload(payload: dict, matrix: dict) -> dict:
+    if isinstance(payload, list):
+        payload = {"items": payload}
     items = payload.get("items")
     if items is None:
         return generate(payload["documentTypeCode"], payload.get("values", {}), matrix)
@@ -153,12 +173,10 @@ def generate_payload(payload: dict, matrix: dict) -> dict:
     for index, item in enumerate(items):
         if not isinstance(item, dict):
             raise CodeEngineError(f"items[{index}] must be an object")
-        item_id = str(item.get("id", "")).strip()
-        if not item_id:
-            raise CodeEngineError(f"items[{index}].id is required")
+        item_id = str(item.get("id") or f"item-{index + 1}").strip()
         if item_id in results:
             raise CodeEngineError(f"Duplicate batch item id: {item_id}")
-        result = generate(item["documentTypeCode"], item.get("values", {}), matrix)
+        result = generate(item["documentTypeCode"], item.get("values", item.get("metadata", {})), matrix)
         results[item_id] = result
         status = result["status"]
         counts[status] = counts.get(status, 0) + 1
@@ -262,15 +280,29 @@ def main() -> int:
     parser.add_argument("--matrix", default=str(Path(__file__).parents[1] / "config" / "document-code-matrix.json"))
     parser.add_argument("--input", help="JSON object; reads stdin when omitted")
     parser.add_argument("--input-file", help="UTF-8 JSON input file; avoids command-line quoting for batches")
+    parser.add_argument("--output", help="Write UTF-8 JSON output instead of stdout")
+    parser.add_argument("--describe-type", help="Return one rule's required inputs without generating a code")
+    parser.add_argument("--aliases", default=str(Path(__file__).parents[1] / "config" / "classification-aliases.json"))
     args = parser.parse_args()
     if args.input and args.input_file:
         parser.error("--input and --input-file are mutually exclusive")
-    if args.input_file:
-        payload = json.loads(Path(args.input_file).read_text(encoding="utf-8"))
+    matrix = load_matrix(args.matrix)
+    if args.describe_type:
+        resolved = resolve_document_type(args.describe_type, matrix, load_matrix(args.aliases))
+        code = resolved or matrix.get("documentTypeAliases", {}).get(args.describe_type.upper(), args.describe_type.upper())
+        rule = matrix.get("rules", {}).get(code)
+        result = {"status": "ready", "documentTypeCode": code, "requiredForCode": rule["requiredForCode"], "codePattern": rule["codePattern"]} if rule else {"status": "unsupported", "documentTypeCode": code}
     else:
-        payload = json.loads(args.input) if args.input else json.load(sys.stdin)
-    result = generate_payload(payload, load_matrix(args.matrix))
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+        if args.input_file:
+            payload = json.loads(Path(args.input_file).read_text(encoding="utf-8"))
+        else:
+            payload = json.loads(args.input) if args.input else json.load(sys.stdin)
+        result = generate_payload(payload, matrix)
+    text = json.dumps(result, ensure_ascii=False, indent=2)
+    if args.output:
+        Path(args.output).write_text(text, encoding="utf-8")
+    else:
+        print(text)
     if result["status"] == "batch":
         return 0 if not any(item["status"] == "invalid" for item in result["results"].values()) else 2
     return 0 if result["status"] in {"ready", "needs_user_input", "unsupported"} else 2

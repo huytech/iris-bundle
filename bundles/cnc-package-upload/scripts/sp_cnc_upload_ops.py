@@ -245,7 +245,7 @@ def upload_plan(config: dict, plan: dict):
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("command", choices=["check-collisions", "upload-plan"])
-    ap.add_argument("--config", required=True)
+    ap.add_argument("--config", default=str(Path(__file__).parents[1] / "config" / "sharepoint.json"))
     ap.add_argument("--plan", required=True)
     ap.add_argument("--output")
     ap.add_argument("--summary-output")

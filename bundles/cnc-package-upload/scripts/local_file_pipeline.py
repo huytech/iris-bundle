@@ -13,6 +13,10 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
 class PipelineError(RuntimeError):
     def __init__(self, code: str, message: str):
         super().__init__(message)
@@ -246,6 +250,21 @@ def _read(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+def resolve_routing_path(path=None):
+    default = Path(__file__).parents[1] / "config" / "folder-routing.json"
+    if path is None:
+        return default
+    candidate = Path(path)
+    if candidate.is_file():
+        return candidate
+    skill_candidate = Path(__file__).parents[1] / candidate
+    if skill_candidate.is_file():
+        return skill_candidate
+    if candidate.name.casefold() in {"routing.json", "folder-routing.json"}:
+        return default
+    raise PipelineError("ROUTING_NOT_FOUND", str(candidate))
+
+
 def unwrap_code_results(value: dict) -> dict:
     if value.get("status") == "batch" and isinstance(value.get("results"), dict):
         return value["results"]
@@ -270,7 +289,7 @@ def main():
     q = sub.add_parser("plan")
     q.add_argument("--scan", required=True)
     q.add_argument("--codes", required=True)
-    q.add_argument("--routing", required=True)
+    q.add_argument("--routing")
     q.add_argument("--package-folder", required=True)
     q.add_argument("--output")
     c = sub.add_parser("confirm")
@@ -278,7 +297,7 @@ def main():
     c.add_argument("--output")
     t = sub.add_parser("stage")
     t.add_argument("--plan", required=True)
-    t.add_argument("--staging-root", required=True)
+    t.add_argument("--staging-root", "--stage-root", dest="staging_root", required=True)
     t.add_argument("--output")
     v = sub.add_parser("verify")
     v.add_argument("--manifest", required=True)
@@ -289,7 +308,8 @@ def main():
         if a.cmd == "scan":
             out = scan_folder(a.source, not a.no_recursive)
         elif a.cmd == "plan":
-            routes = _read(a.routing).get("routingByDocumentType", _read(a.routing))
+            routing = _read(resolve_routing_path(a.routing))
+            routes = routing.get("routingByDocumentType", routing)
             out = build_plan(_read(a.scan), unwrap_code_results(_read(a.codes)), routes, a.package_folder)
         elif a.cmd == "confirm":
             out = confirm_plan(_read(a.plan))

@@ -22,6 +22,7 @@
     "siteUrl": "https://ttgvncom.sharepoint.com/teams/ai2",
     "libraryName": "AIT DATA",
     "destinationRootPath": "90 TENDER DEMO",
+    "packageRootPath": "90 TENDER DEMO",
     "packageFolderNameSource": "user_input_verbatim"
   },
   "confirmation": {
@@ -58,8 +59,11 @@
     "NhaThau": "NhaThau"
   },
   "dependencies": {
-    "codeGeneratorSkill": "cnc-generate-document-code",
-    "packageFolderSkill": "cnc-create-package",
-    "localPipelineScript": "scripts/local_file_pipeline.py"
+    "prepareScript": "scripts/prepare_upload.py",
+    "codeEngine": "scripts/document_code_engine.py",
+    "localPipelineScript": "scripts/local_file_pipeline.py",
+    "packageScript": "scripts/sp_cnc_package_ops.py",
+    "uploadScript": "scripts/sp_cnc_upload_ops.py",
+    "executeScript": "scripts/execute_upload.py"
   }
 }

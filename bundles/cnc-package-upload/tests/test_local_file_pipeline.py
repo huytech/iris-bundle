@@ -94,6 +94,12 @@ def test_plan_accepts_batch_engine_result_envelope(tmp_path):
     assert plan["state"] == "planned"
 
 
+def test_routing_path_defaults_and_accepts_common_alias():
+    p = load_module()
+    assert p.resolve_routing_path().name == "folder-routing.json"
+    assert p.resolve_routing_path("config/routing.json").name == "folder-routing.json"
+
+
 def test_stage_requires_confirmed_plan_and_preserves_source(tmp_path):
     p = load_module()
     src = tmp_path / "src"

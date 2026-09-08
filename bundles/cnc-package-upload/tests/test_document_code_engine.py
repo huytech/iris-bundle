@@ -80,6 +80,26 @@ def test_batch_matches_individual_generation_and_summarizes_statuses():
     assert batch["results"]["boq.xlsx"]["status"] == "unsupported"
     assert batch["summary"] == {"total": 3, "ready": 1, "needs_user_input": 1, "unsupported": 1}
 
+def test_batch_accepts_top_level_item_list():
+    items = [{"id": "fac.pdf", "documentTypeCode": "FAC", "values": {"ParentContractCode": "R02_TTDN_CTC_CTR_01"}}]
+    assert engine.generate_payload(items, MATRIX) == engine.generate_payload({"items": items}, MATRIX)
+
+def test_business_name_resolves_without_diacritics():
+    aliases = json.loads((ROOT / "config" / "classification-aliases.json").read_text(encoding="utf-8"))
+    assert engine.resolve_document_type("Ke hoach dau thau va mua sam tong the", MATRIX, aliases) == "MPP"
+
+def test_code_only_batch_accepts_metadata_and_missing_id():
+    result = engine.generate_payload([{"documentTypeCode": "MPP", "metadata": {"DuAn": "M01"}}], MATRIX)
+    assert result["results"]["item-1"]["DocumentCode"] == "M01_MPP"
+
+def test_cli_output_option_writes_json(tmp_path, monkeypatch):
+    input_path = tmp_path / "input.json"
+    output_path = tmp_path / "output.json"
+    input_path.write_text('{"documentTypeCode":"FAC","values":{"ParentContractCode":"R02_TTDN_CTC_CTR_01"}}', encoding="utf-8")
+    monkeypatch.setattr("sys.argv", ["engine", "--input-file", str(input_path), "--output", str(output_path)])
+    assert engine.main() == 0
+    assert json.loads(output_path.read_text(encoding="utf-8"))["status"] == "ready"
+
 def test_batch_rejects_duplicate_ids():
     payload = {"items": [
         {"id": "same.pdf", "documentTypeCode": "COP", "values": {"DuAn": "M01"}},

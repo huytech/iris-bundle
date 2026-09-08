@@ -45,3 +45,17 @@ def test_items_by_path_falls_back_when_graph_batch_fails(monkeypatch):
         "root/PKG": {"name": "root/PKG"},
         "root/PKG/child": {"name": "root/PKG/child"},
     }
+
+
+def test_create_from_plan_uses_only_approved_missing_paths(monkeypatch):
+    config = {"siteUrl": "site", "libraryName": "lib", "packageRootPath": "root"}
+    template = {"folders": [{"path": "child"}]}
+    plan = {"siteUrl": "site", "libraryName": "lib", "driveId": "drive", "packageRootPath": "root", "packageFolderName": "PKG", "missing": ["root/PKG", "root/PKG/child"], "verified": False}
+    plan["planHash"] = package_ops.package_plan_hash(plan)
+    previews = [plan, {**plan, "missing": [], "verified": True}]
+    monkeypatch.setattr(package_ops, "preview", lambda *_: previews.pop(0))
+    created = []
+    monkeypatch.setattr(package_ops, "create_folder", lambda drive, parent, name: created.append((drive, parent, name)))
+    result = package_ops.create_from_plan(config, template, plan)
+    assert created == [("drive", "root", "PKG"), ("drive", "root/PKG", "child")]
+    assert result["verified"] is True

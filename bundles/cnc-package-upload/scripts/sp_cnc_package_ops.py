@@ -15,6 +15,7 @@ Authentication:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -173,7 +174,7 @@ def preview(config: dict, template: dict, package_name: str):
     items = items_by_path(drive["id"], paths)
     existing = [path for path in paths if items[path]]
     missing = [path for path in paths if not items[path]]
-    return {
+    result = {
         "siteUrl": config["siteUrl"],
         "libraryName": config["libraryName"],
         "driveId": drive["id"],
@@ -185,6 +186,36 @@ def preview(config: dict, template: dict, package_name: str):
         "needsCreateOrUpdate": bool(missing),
         "verified": not missing,
     }
+    result["planHash"] = package_plan_hash(result)
+    return result
+
+
+def package_plan_hash(plan: dict):
+    value = {key: plan.get(key) for key in ("siteUrl", "libraryName", "packageRootPath", "packageFolderName", "missing")}
+    return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def create_from_plan(config: dict, template: dict, plan: dict):
+    if plan.get("planHash") != package_plan_hash(plan):
+        raise SpError("Package plan hash is missing or invalid; run preview again")
+    for key in ("siteUrl", "libraryName", "packageRootPath"):
+        if plan.get(key) != config.get(key):
+            raise SpError(f"Package plan {key} does not match config")
+    current = preview(config, template, plan["packageFolderName"])
+    approved = set(plan.get("missing", []))
+    unapproved = [path for path in current["missing"] if path not in approved]
+    if unapproved:
+        raise SpError(f"Package tree changed after confirmation; preview again: {unapproved}")
+    drive_id = current["driveId"]
+    created = []
+    for path in required_paths(current["packageRootPath"], current["packageFolderName"], template):
+        if path not in current["missing"]:
+            continue
+        parent, name = split_parent(path)
+        create_folder(drive_id, parent, name)
+        created.append(path)
+    after = preview(config, template, current["packageFolderName"])
+    return {"packageFolderName": current["packageFolderName"], "created": created, "missing": after["missing"], "verified": after["verified"]}
 
 
 def create(config: dict, template: dict, package_name: str):
@@ -216,9 +247,11 @@ def create(config: dict, template: dict, package_name: str):
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("command", choices=["preview", "create"])
-    ap.add_argument("--config", required=True)
-    ap.add_argument("--template", required=True)
-    ap.add_argument("--package", required=True, dest="package_name")
+    base = Path(__file__).parents[1]
+    ap.add_argument("--config", default=str(base / "config/package-sharepoint.json"))
+    ap.add_argument("--template", default=str(base / "config/package-folder-template.json"))
+    ap.add_argument("--package", dest="package_name")
+    ap.add_argument("--plan")
     ap.add_argument("--output")
     args = ap.parse_args(argv)
     try:
@@ -226,7 +259,16 @@ def main(argv=None):
         template = read_json(args.template)
         if config.get("libraryName") == "__REQUIRED__" or config.get("packageRootPath") == "__REQUIRED__":
             raise SpError("libraryName/packageRootPath is __REQUIRED__; ask user first")
-        result = preview(config, template, args.package_name) if args.command == "preview" else create(config, template, args.package_name)
+        if args.command == "preview":
+            if not args.package_name:
+                raise SpError("preview requires --package")
+            result = preview(config, template, args.package_name)
+        elif args.plan:
+            result = create_from_plan(config, template, read_json(args.plan))
+        elif args.package_name:
+            result = create(config, template, args.package_name)
+        else:
+            raise SpError("create requires --plan or --package")
         text = json.dumps(result, ensure_ascii=False, indent=2)
         if args.output:
             Path(args.output).write_text(text, encoding="utf-8")
