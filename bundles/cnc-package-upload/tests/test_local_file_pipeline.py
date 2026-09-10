@@ -70,6 +70,18 @@ def test_plan_blocks_when_agent_marks_filename_decision_needed(tmp_path):
     plan = p.build_plan(scan, {"old_name.pdf": result}, {"TDO": "02. TENDERING/02. ITB"}, "1xx")
     assert plan["files"][0]["state"] == "needs_user_input"
     assert plan["files"][0]["reason"] == "FILENAME_DECISION_REQUIRED"
+    assert plan["state"] == "blocked"
+
+
+def test_plan_blocks_when_code_or_route_is_unresolved(tmp_path):
+    p = load_module()
+    scan = {"sourceRoot": str(tmp_path), "files": [{"relativePath": "a.pdf", "size": 1, "sha256": "a" * 64}]}
+    missing_code = p.build_plan(scan, {"a.pdf": {"status": "needs_user_input"}}, {"COP": "route"}, "TTG.001")
+    assert missing_code["state"] == "blocked"
+    ready_code = {"status": "ready", "DocumentCode": "M01_COP", "components": {"LoaiTaiLieu": "COP"}}
+    missing_route = p.build_plan(scan, {"a.pdf": ready_code}, {}, "TTG.001")
+    assert missing_route["state"] == "blocked"
+    assert missing_route["files"][0]["reason"] == "NO_FOLDER_ROUTE"
 
 
 def test_plan_detects_collision_before_staging(tmp_path):

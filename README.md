@@ -11,4 +11,4 @@ https://raw.githubusercontent.com/huytech/iris-bundle/main/manifest.json
 | Bundle | Type | Version | Files |
 | --- | --- | --- | --- |
 | ocr-and-documents | skill | 0.1.0 | 314 |
-| cnc-package-upload | skill | 0.3.0 | 27 |
+| cnc-package-upload | skill | 0.3.2 | 27 |

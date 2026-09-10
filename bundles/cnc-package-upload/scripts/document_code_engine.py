@@ -36,11 +36,16 @@ def _search_key(value: str) -> str:
 
 def resolve_document_type(query: str, matrix: dict, aliases: dict) -> str | None:
     key = _search_key(query)
-    matches = []
+    exact = []
+    related = []
     for code, rule in matrix.get("rules", {}).items():
         terms = [code, rule.get("businessName", ""), *aliases.get("aliases", {}).get(code, [])]
-        if any(_search_key(term) == key for term in terms):
-            matches.append(code)
+        term_keys = [_search_key(term) for term in terms if term]
+        if key in term_keys:
+            exact.append(code)
+        elif any(key in term or term in key for term in term_keys):
+            related.append(code)
+    matches = list(dict.fromkeys(exact or related))
     return matches[0] if len(matches) == 1 else None
 
 def normalize_code_token(value, field: str) -> str:

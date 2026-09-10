@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T10:09:24.781Z",
+  "generatedAt": "2026-09-10T04:22:24.024Z",
   "repository": "https://github.com/huytech/iris-bundle.git",
   "branch": "main",
   "rawBaseUrl": "https://raw.githubusercontent.com/huytech/iris-bundle/main",
@@ -1904,7 +1904,7 @@
       "id": "cnc-package-upload",
       "name": "CNC Package Upload",
       "type": "skill",
-      "version": "0.3.0",
+      "version": "0.3.2",
       "description": "Classify, code, prepare packages, upload, and verify CNC files in SharePoint.",
       "entry": "SKILL.md",
       "root": "bundles/cnc-package-upload",
@@ -1923,8 +1923,8 @@
         },
         {
           "path": "config/folder-routing.json",
-          "size": 1201,
-          "sha256": "18726f2cc928639cf77f919be6872fc6fefd2ac958fa1e42c9a77159289129a3",
+          "size": 1400,
+          "sha256": "4ccf15956d8a6ac18aa1b7d95876f1596fe85992c906ec7585375eaf75fdbef6",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/config/folder-routing.json"
         },
         {
@@ -1983,8 +1983,8 @@
         },
         {
           "path": "scripts/document_code_engine.py",
-          "size": 15004,
-          "sha256": "a0f215ad0e2b139cf3a9231b5544824f8a06a23c086cfbf11ff4326571d2f4f8",
+          "size": 15205,
+          "sha256": "bd382b30a351d9798891957aec02b007bc7c60bad8abc74f0866967dc8c2d74b",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/scripts/document_code_engine.py"
         },
         {
@@ -1995,8 +1995,8 @@
         },
         {
           "path": "scripts/local_file_pipeline.py",
-          "size": 13722,
-          "sha256": "1f983cbb297ca2e840943f6fa4f48b7b39c658ab8caf23b16a65f5a8c7914948",
+          "size": 13807,
+          "sha256": "d1c98971d45e61642aa2cdd2ef66a3ca15106df0e906180cc99dd5871e0642ea",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/scripts/local_file_pipeline.py"
         },
         {
@@ -2007,8 +2007,8 @@
         },
         {
           "path": "scripts/prepare_upload.py",
-          "size": 4223,
-          "sha256": "65b0d073cea67754c98840eb42a00f84122a15ee737204429ec795a1da0fa3a8",
+          "size": 27034,
+          "sha256": "1bcd2001a71da2d97e9461209f0fb86ee547d43334ac8391bccb85d573969200",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/scripts/prepare_upload.py"
         },
         {
@@ -2025,8 +2025,8 @@
         },
         {
           "path": "SKILL.md",
-          "size": 5843,
-          "sha256": "e8ec177df475da16dfb9e9763667a5ab8dfed7ec05e554881f1eef27ff9b287b",
+          "size": 8678,
+          "sha256": "51e49cf3000c9b4b5dbd38315343ec9e140cd26e55aefaeeb159ab7ac5148e85",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/SKILL.md"
         },
         {
@@ -2037,8 +2037,8 @@
         },
         {
           "path": "tests/test_local_file_pipeline.py",
-          "size": 6978,
-          "sha256": "6d727f6b654f133969612d40ef0facafa2eda4e878bbf726e7e316565c93a1f5",
+          "size": 7665,
+          "sha256": "f81a0490e8122eb9deb4eb0e25fa1af15d58af2694f1e5f4eca6f4b243f32dbe",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/tests/test_local_file_pipeline.py"
         },
         {
@@ -2049,8 +2049,8 @@
         },
         {
           "path": "tests/test_prepare_upload.py",
-          "size": 1603,
-          "sha256": "60c4bb8fda38c70efe4ab6ab8b228926c365ba35a2a6de4737e49d30210119d2",
+          "size": 18333,
+          "sha256": "92b121c671d1a3410a8688c9ffebcc4e6539438d8e456583f7f877aa7418c40c",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/tests/test_prepare_upload.py"
         },
         {
@@ -2067,8 +2067,8 @@
         },
         {
           "path": "tests/test-cases.json",
-          "size": 3872,
-          "sha256": "9b0ae0a8b02cf5200dda58ea43477a6256cdb6b2d67dc5d20129a9a7fca0deb0",
+          "size": 4038,
+          "sha256": "3bfd3e50cbd92c51e4dd734fe45facf0d03e5e589431b00c3c3d6008f6c0b1f8",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/tests/test-cases.json"
         }
       ]

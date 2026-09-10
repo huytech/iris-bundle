@@ -19,7 +19,7 @@
     "LOA": "02. TENDERING/09. LOA",
 
     "CTR": "03. CONTRACT/01. CTR",
-    "APL": "03. CONTRACT/02. APL",
+    "PL": "03. CONTRACT/02. APL",
 
     "IPC": "04. POST-CONTRACT/01. IPC",
     "VO": "04. POST-CONTRACT/02. VO",
@@ -28,6 +28,10 @@
     "APB": "04. POST-CONTRACT/05. GUP",
     "PPB": "04. POST-CONTRACT/06. GUC",
     "WRB": "04. POST-CONTRACT/07. GUW"
+  },
+  "intentionallyUnroutedDocumentTypes": {
+    "QUO": "Package template has no confirmed purchasing quotation folder.",
+    "COR": "Package template has no confirmed quotation comparison folder."
   },
   "fallback": {
     "unclassified": "05. REFERENCE/03. ADMIN",

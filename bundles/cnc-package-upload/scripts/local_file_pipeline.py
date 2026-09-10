@@ -137,8 +137,9 @@ def build_plan(scan, code_results, routing, package_folder_name):
         else:
             seen[key] = rel
         planned.append(entry)
+    incomplete = any(item.get("state") != "ready" for item in planned)
     return {"schemaVersion": 1, "operationId": "cnc-" + uuid.uuid4().hex[:12], "createdAt": utc_now(),
-            "sourceRoot": scan["sourceRoot"], "packageFolderName": package, "state": "blocked" if collisions else "planned",
+            "sourceRoot": scan["sourceRoot"], "packageFolderName": package, "state": "blocked" if collisions or incomplete else "planned",
             "files": planned, "collisions": collisions}
 
 
