@@ -7,7 +7,7 @@ description: Phân loại, tạo mã, kiểm tra hoặc tạo package sau xác n
 
 Agent hiểu yêu cầu và nội dung hồ sơ, chọn documentTypeCode, xác định input mã và trình preview. Script thực hiện scan/hash file, snapshot/lookup master data, render mã, kiểm tra package, tạo package đã duyệt, stage, upload và verify.
 
-Không load các skill CNC cũ và không đọc source Python trong quy trình thông thường. Chỉ đọc source khi helper lỗi hoặc user yêu cầu debug.
+Không đọc source Python trong quy trình thông thường. Chỉ đọc source khi helper lỗi hoặc user yêu cầu debug.
 
 ## Chỉ tạo mã
 

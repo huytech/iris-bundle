@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-10T04:22:24.024Z",
+  "generatedAt": "2026-09-10T04:33:03.498Z",
   "repository": "https://github.com/huytech/iris-bundle.git",
   "branch": "main",
   "rawBaseUrl": "https://raw.githubusercontent.com/huytech/iris-bundle/main",
@@ -1904,7 +1904,7 @@
       "id": "cnc-package-upload",
       "name": "CNC Package Upload",
       "type": "skill",
-      "version": "0.3.2",
+      "version": "0.3.3",
       "description": "Classify, code, prepare packages, upload, and verify CNC files in SharePoint.",
       "entry": "SKILL.md",
       "root": "bundles/cnc-package-upload",
@@ -2025,8 +2025,8 @@
         },
         {
           "path": "SKILL.md",
-          "size": 8678,
-          "sha256": "51e49cf3000c9b4b5dbd38315343ec9e140cd26e55aefaeeb159ab7ac5148e85",
+          "size": 8643,
+          "sha256": "04ee42576d1538d8b9cf1ce1f799ccdaf9f0d3f14acaf920c9c0502403f00576",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/SKILL.md"
         },
         {
