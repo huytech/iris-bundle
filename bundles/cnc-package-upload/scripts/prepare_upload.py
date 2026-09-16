@@ -317,6 +317,21 @@ def file_name_decision(relative_path: str, result: dict, matrix: dict, masters: 
                     "oldPrefixToRemove": stem[:len(code)],
                     "cleanBaseName": stem[len(prefix):].strip(" _-"),
                 }
+    detected = document_code_engine.detect_existing_prefix(relative_path, matrix, masters)
+    if detected["status"] in {"unique_match", "no_prefix"}:
+        if detected["status"] == "unique_match":
+            return {
+                "status": "agent_decided",
+                "oldPrefixToRemove": detected.get("prefix"),
+                "cleanBaseName": detected.get("cleanBaseName", stem),
+            }
+    else:
+        return {
+            "status": "needs_user_input",
+            "oldPrefixToRemove": detected.get("prefix"),
+            "cleanBaseName": detected.get("cleanBaseName", stem),
+        }
+    if code:
         code_parts = code.split("_")
         for part_count in range(len(code_parts) - 1, 1, -1):
             candidate = "_".join(code_parts[:part_count])
@@ -330,12 +345,7 @@ def file_name_decision(relative_path: str, result: dict, matrix: dict, masters: 
                         "oldPrefixToRemove": stem[:len(candidate)],
                         "cleanBaseName": stem[len(prefix):].strip(" _-"),
                     }
-    detected = document_code_engine.detect_existing_prefix(relative_path, matrix, masters)
-    return {
-        "status": "agent_decided" if detected["status"] in {"unique_match", "no_prefix"} else "needs_user_input",
-        "oldPrefixToRemove": detected.get("prefix"),
-        "cleanBaseName": detected.get("cleanBaseName", stem),
-    }
+    return {"status": "agent_decided", "oldPrefixToRemove": None, "cleanBaseName": stem}
 
 
 def prepare_business_values(values: dict, request_context: str, matrix: dict) -> dict:

@@ -116,6 +116,23 @@ def test_file_name_decision_removes_matching_new_code_prefix():
     assert exact["cleanBaseName"] == ""
 
 
+def test_file_name_decision_prefers_full_old_code_over_shared_new_parent_prefix():
+    matrix = prepare_upload.document_code_engine.load_matrix(ROOT / "config" / "document-code-matrix.json")
+    masters = {"DuAn": {"M02"}, "GoiThau": set(), "PhapNhan": {"TTDN"}, "NhaThau": {"CTC"}}
+    result = {"DocumentCode": "M02_TTDN_CTC_CTR_01_IPC_01"}
+    decision = prepare_upload.file_name_decision(
+        "M02_TTDN_CTC_CTR_01_FAC_Bien ban nghiem thu.pdf",
+        result,
+        matrix,
+        masters,
+    )
+    assert decision == {
+        "status": "agent_decided",
+        "oldPrefixToRemove": "M02_TTDN_CTC_CTR_01_FAC",
+        "cleanBaseName": "Bien ban nghiem thu",
+    }
+
+
 def test_file_name_decision_removes_partial_new_code_prefix():
     matrix = prepare_upload.document_code_engine.load_matrix(ROOT / "config" / "document-code-matrix.json")
     masters = {"DuAn": {"M01"}, "GoiThau": {"ELV01"}, "PhapNhan": set(), "NhaThau": set()}

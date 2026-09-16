@@ -54,6 +54,8 @@ Nếu giữ nguyên toàn bộ stem tên cũ:
 
 Nếu tên đã bắt đầu đúng `DocumentCode`, không gắn thêm lần nữa. Nếu bắt đầu bằng một mã hợp lệ khác, replace toàn bộ prefix cũ bằng mã mới.
 
+Khi tên cũ và mã mới dùng chung mã cha hợp đồng, vẫn phải bỏ toàn bộ prefix cũ hợp lệ trước khi xét fallback theo mã cha. Ví dụ tên cũ `M02_TTDN_CTC_CTR_01_FAC_Bien ban.pdf` đổi sang `M02_TTDN_CTC_CTR_01_IPC_01` phải tạo `M02_TTDN_CTC_CTR_01_IPC_01_Bien ban.pdf`, không được giữ lại `FAC`.
+
 ## Làm sạch tối thiểu
 
 - Bỏ `_` và khoảng trắng thừa ở ranh giới prefix/nội dung.

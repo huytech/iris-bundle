@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-16T08:30:19.790Z",
+  "generatedAt": "2026-09-16T09:33:30.757Z",
   "repository": "https://github.com/huytech/iris-bundle.git",
   "branch": "main",
   "rawBaseUrl": "https://raw.githubusercontent.com/huytech/iris-bundle/main",
@@ -1959,8 +1959,8 @@
         },
         {
           "path": "references/filename-normalization.md",
-          "size": 2233,
-          "sha256": "8d8f534ecb19a03971dc33c78b217e5190033dd09657bb1d90360576ccc90e04",
+          "size": 2577,
+          "sha256": "3a82358a39b4aed747903516fc83361bcc514faa645776922989ddbca9116249",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/references/filename-normalization.md"
         },
         {
@@ -1977,8 +1977,8 @@
         },
         {
           "path": "references/safety-rules.md",
-          "size": 2075,
-          "sha256": "c5bf44ae4ebcdcfa00f59cdfd06c6199f30f63d89a853655ae589317bd3e3901",
+          "size": 2273,
+          "sha256": "c66e6d331f7e0e965b587a31ca3f2677d62f305b62b3d869d5a822bc4206ce8d",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/references/safety-rules.md"
         },
         {
@@ -2007,8 +2007,8 @@
         },
         {
           "path": "scripts/prepare_upload.py",
-          "size": 28482,
-          "sha256": "0173ab6369af18bf157ca5f7094f138046e2b1608c75b318e4fec29d4abd5e66",
+          "size": 28856,
+          "sha256": "aba7ff92d797ea6ad8aefc42ba36acbf273693181744ac4b481c5459df9ab2b1",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/scripts/prepare_upload.py"
         },
         {
@@ -2025,8 +2025,8 @@
         },
         {
           "path": "SKILL.md",
-          "size": 9909,
-          "sha256": "c98ed29f3a8ae91c771941ed5fe5321df23e0c867fd7c2dcb18229de784f6a71",
+          "size": 11533,
+          "sha256": "e9029d9ac15cce4914d987bfdb83dc9e5eba0d447ac18a519ab6833cb3aa431f",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/SKILL.md"
         },
         {
@@ -2049,8 +2049,8 @@
         },
         {
           "path": "tests/test_prepare_upload.py",
-          "size": 19814,
-          "sha256": "60ac3b2de0966c40a3c99c5f157cba1d653fe729ee9c6387f130a80197726a5d",
+          "size": 20493,
+          "sha256": "627879c5515b3870d401566de15abd6397117fb0ec5fe72bf6c7d3972eeb4c11",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/tests/test_prepare_upload.py"
         },
         {
