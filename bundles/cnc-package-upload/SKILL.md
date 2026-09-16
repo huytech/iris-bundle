@@ -11,13 +11,13 @@ Không đọc source Python trong quy trình thông thường. Chỉ đọc sour
 
 ## CNC Auto Intake
 
-Trong preset `CNC Agent`, khi user gửi file hoặc folder mà không gõ thêm nội dung, xem đó là yêu cầu CNC Auto Intake: tự đọc tên file, suy ra nghiệp vụ đủ rõ, đổi tên theo rule, chọn folder đích và upload. Không áp dụng hành vi này cho preset thường.
+Trong preset `CNC Agent`, khi user gửi file hoặc folder mà không gõ thêm nội dung, xem đó là yêu cầu CNC Auto Intake: tự đọc tên file, suy ra nghiệp vụ đủ rõ, đổi tên theo rule, chọn folder đích và lập preview upload. Không áp dụng hành vi này cho preset thường.
 
 Không hỏi lại source khi file/folder đã nằm trong tin nhắn, attachment, file picker, workspace hoặc đường dẫn hội thoại đã nêu. Nếu user không gửi link SharePoint, vẫn tiếp tục bằng package/folder đích suy ra được từ tên file, folder nguồn hoặc ngữ cảnh phiên; chỉ hỏi khi không có đúng một package/folder đích có thể xác minh.
 
 Khi chọn folder con, ưu tiên mã tài liệu đã render. Với mã thường, dùng token loại tài liệu 3 ký tự trong `DocumentCode`. Với nhóm hợp đồng, nếu mã chỉ có `CTR` thì vào folder `CTR`; nếu sau `CTR` có `IPC`, `VO`, `PL` hoặc `FAC` thì vào folder tương ứng. Không hỏi lại folder con khi route là duy nhất.
 
-Nếu `prepare-and-plan` trả `ready`, `fileCount > 0`, `collisionCount = 0`, không có file unresolved và package plan chỉ tạo/bổ sung đúng cây folder template cho package đã suy ra, gửi preview ngắn trong chat rồi chạy `execute_upload.py` luôn. Không gọi `ask_user_question` trong case sạch này. Auto Intake dừng lại và hỏi đúng một câu khi thiếu dữ kiện nghiệp vụ, có nhiều package/folder trùng, collision, source rỗng, unresolved file hoặc helper trả `invalid`/`blocked`.
+Nếu `prepare-and-plan` trả `ready`, `fileCount > 0`, `collisionCount = 0`, không có file unresolved và package plan chỉ tạo/bổ sung đúng cây folder template cho package đã suy ra, gửi preview trong chat rồi hỏi user duyệt giống quy trình upload thông thường. Không chạy `execute_upload.py` trước khi user xác nhận preview cụ thể. Auto Intake dừng lại và hỏi đúng một câu khi thiếu dữ kiện nghiệp vụ, có nhiều package/folder trùng, collision, source rỗng, unresolved file hoặc helper trả `invalid`/`blocked`.
 
 ## Chỉ tạo mã
 
