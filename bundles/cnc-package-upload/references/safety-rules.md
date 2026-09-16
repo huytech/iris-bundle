@@ -2,10 +2,10 @@
 
 1. Nguồn là folder local do user truyền; chỉ đọc nguồn.
 2. Không rename, move, ghi đè hoặc xóa file nguồn.
-3. Mọi file phải qua `scan → plan → confirmation hoặc CNC Auto Intake preauthorization → stage → upload → metadata → verify`.
+3. Mọi file phải qua `scan → plan → user confirmation → stage → upload → metadata → verify`.
 4. Chỉ nhận mã `ready` từ `scripts/document_code_engine.py`; không tự ghép/sửa mã ngoài engine.
 5. `plan` phải hiển thị source, prefix cũ agent quyết định bỏ, mã, tên mới, destination, năm metadata và collision; script không được tự detect prefix cũ.
-6. Confirmation là bắt buộc trừ CNC Auto Intake trong preset `CNC Agent`, nơi user gửi file/folder được xem là preauthorization cho case sạch. Preview chi tiết phải hiển thị trong chat chính hoặc file preview; nếu cần popup hỏi xác nhận thì popup chỉ được là câu ngắn dễ duyệt, không nhồi markdown table dài. Yêu cầu chung “xử lý/upload” ngoài Auto Intake không thay thế việc duyệt preview cụ thể.
+6. Confirmation là bắt buộc, kể cả CNC Auto Intake. Preview chi tiết phải hiển thị trong chat chính hoặc file preview; nếu cần popup hỏi xác nhận thì popup chỉ được là câu ngắn dễ duyệt, không nhồi markdown table dài. Yêu cầu chung “xử lý/upload” không thay thế việc duyệt preview cụ thể.
 7. Khi plan thay đổi sau confirmation, confirmation cũ vô hiệu.
 8. Stage bằng bản copy trong `.cnc-staging`; hash nguồn và staging phải giống nhau.
 9. Không follow symlink/junction và không cho staging nằm trong source.

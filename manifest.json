@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-16T10:39:37.619Z",
+  "generatedAt": "2026-09-16T10:42:35.627Z",
   "repository": "https://github.com/huytech/iris-bundle.git",
   "branch": "main",
   "rawBaseUrl": "https://raw.githubusercontent.com/huytech/iris-bundle/main",
@@ -1977,8 +1977,8 @@
         },
         {
           "path": "references/safety-rules.md",
-          "size": 2273,
-          "sha256": "c66e6d331f7e0e965b587a31ca3f2677d62f305b62b3d869d5a822bc4206ce8d",
+          "size": 2120,
+          "sha256": "00bd6124f55d64c1d703429daa528503b9158098b12d1567c7f037a452131f6d",
           "url": "https://raw.githubusercontent.com/huytech/iris-bundle/main/bundles/cnc-package-upload/references/safety-rules.md"
         },
         {
