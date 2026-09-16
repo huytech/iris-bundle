@@ -25,6 +25,8 @@ Với yêu cầu upload đã có đủ dữ kiện nghiệp vụ, chạy đúng 
 python scripts/prepare_upload.py prepare-and-plan --source "<sourceFolderPath>" --package "<packageFolderName>" --workspace "<agentWorkingDirectory>" --output-dir ".cnc-work/<packageFolderName>" --document-type "<businessNameOrCode>" --request-context "<conciseOriginalRequest>" --value "<knownBusinessField>=<value>"
 ```
 
+`--source` là folder hoặc file nguồn agent đã truy cập được từ tin nhắn, attachment, file picker, workspace hoặc đường dẫn user đã nêu. Nếu user đã gửi folder/file hoặc đã có path trong hội thoại thì dùng path đó, không hỏi lại "đường dẫn folder nguồn". Thiếu link SharePoint/folder đích không đồng nghĩa thiếu source; khi thiếu link đích, tự lập preview bằng package/folder đích đã suy ra hoặc hỏi đúng package/folder đích, không hỏi source. Chỉ hỏi source một lần khi trong hội thoại thật sự chưa có folder/file/path nào agent có thể scan.
+
 Agent phân loại nghiệp vụ và tổng hợp dữ liệu từ toàn bộ hội thoại hiện tại, tên file và nội dung hồ sơ đã đọc. Không hỏi lại dữ liệu đã xuất hiện. Script tự chuẩn hóa sequence, resolve code/name theo master và tự dựng mã hợp đồng cha khi đủ thành phần.
 
 Các tên field ưu tiên khi truyền `--value` là `DuAn`, `GoiThau`, `PhapNhan`, `NhaThau`, `ContractSequence`, `DocumentSequence`, `ParentContractCode` và `ExpiryDateYYMMDD`. `ContractSequence` và `DocumentSequence` bắt buộc là số từ 1 đến 99, có thể có số 0 ở đầu. Khi user nói `đợt 1`, `lần thứ 2` hoặc `kỳ 03`, truyền lần lượt `DocumentSequence=1`, `DocumentSequence=2` hoặc `DocumentSequence=03`; không truyền nguyên cụm nghiệp vụ vào `--value`. Giữ câu gốc trong `--request-context` để helper có thể kiểm tra và tự chuẩn hóa. Script chấp nhận các alias tiếng Anh thông dụng nhưng agent phải giữ nguyên dữ kiện rõ ràng trong lời user và không hỏi lại dữ kiện đã xác định duy nhất.
@@ -39,18 +41,18 @@ Nếu `status=needs_user_input`, dùng `question` do script trả về và chỉ
 
 Không xin xác nhận nếu `fileCount=0`, `unresolvedFileCount>0`, preview thiếu file hoặc status khác `ready`. Số dòng dữ liệu trong preview phải bằng số file nguồn hợp lệ đã scan.
 
-Preview chi tiết luôn là assistant message trong chat với bảng dễ đọc như nguồn, mã tài liệu, tên file mới, destination, metadata và collision. Chỉ sau khi message preview đã hiển thị mới gọi `ask_user_question`. Popup chỉ hỏi một câu ngắn nêu package và số file; không lặp bảng, đường dẫn dài, metadata hoặc danh sách folder trong câu hỏi. Trạng thái chờ hỏi sẽ để Desktop gửi notification cho user khi cửa sổ không focus.
+Preview chi tiết luôn là assistant message trong chat với bảng dễ đọc như nguồn, mã tài liệu, tên file mới, destination, metadata và collision. Chỉ sau khi message preview đã hiển thị mới gọi `ask_user_question`. Popup chỉ hỏi một câu ngắn nêu package và số file; không lặp bảng, đường dẫn dài, metadata hoặc danh sách folder trong câu hỏi. Question id phải là `confirm_cnc_upload_<operationId>` lấy từ plan, và option xác nhận upload phải có label chính xác `Xác nhận upload`. Trạng thái chờ hỏi sẽ để Desktop gửi notification cho user khi cửa sổ không focus.
 
 Không dùng `todo_write` cho workflow này. Không đọc lại context, snapshot, matrix hoặc output JSON khi stdout đã có status, question hoặc preview. Không gọi `--describe-type` trong luồng upload. Không gọi lại `prepare-and-plan` để dò input. Chỉ tạo subagent khi nhiều file cần đọc nội dung độc lập; không tạo subagent để scan, tra master, render mã, build plan hoặc kiểm tra package/collision.
 
 ## Sau xác nhận
 
-Không tạo folder, stage hoặc upload trước khi user duyệt preview cụ thể. Sau khi duyệt:
+Không tạo folder, stage hoặc upload trước khi user duyệt preview cụ thể. Sau khi gọi `ask_user_question`, chỉ được tiếp tục nếu tool result có `answers` chứa đúng question id `confirm_cnc_upload_<operationId>` và `selected` chứa `Xác nhận upload`. Nếu tool result là `{}`, `answers` rỗng, timeout, user đóng popup, hoặc user chọn `Chưa upload`, dừng tại preview và báo chưa upload. Không suy đoán sự im lặng, popup bị bỏ qua hoặc kết quả rỗng là đồng ý. Sau khi duyệt:
 
 Sau confirmation, chỉ chạy một command; không gọi riêng create/confirm/stage/collision/upload và không tự chọn config:
 
 ```bash
-python scripts/execute_upload.py --package-plan "<packagePlanPath>" --upload-plan "<uploadPlanPath>" --workspace "<agentWorkingDirectory>" --output-dir ".cnc-work/<packageFolderName>/execute"
+python scripts/execute_upload.py --package-plan "<packagePlanPath>" --upload-plan "<uploadPlanPath>" --workspace "<agentWorkingDirectory>" --output-dir ".cnc-work/<packageFolderName>/execute" --confirmation-response '<exact ask_user_question JSON result>'
 ```
 
 Script xác minh plan package, tạo và verify folder đã duyệt, confirm plan upload, stage bản copy, kiểm tra collision cuối, upload, gán metadata, đọc lại verify và chỉ cleanup khi toàn bộ thành công. Lỗi giữa chừng giữ output/checkpoint và staging để điều tra hoặc retry.
