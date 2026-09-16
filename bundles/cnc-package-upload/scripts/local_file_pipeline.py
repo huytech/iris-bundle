@@ -53,7 +53,21 @@ def scan_folder(source, recursive=True, exclude_patterns=None):
     if not root.exists():
         raise PipelineError("SOURCE_NOT_FOUND", str(root))
     if not root.is_dir():
-        raise PipelineError("SOURCE_NOT_DIRECTORY", str(root))
+        if not root.is_file():
+            raise PipelineError("SOURCE_NOT_DIRECTORY", str(root))
+        st = root.stat()
+        return {
+            "schemaVersion": 1,
+            "sourceRoot": str(root.parent),
+            "scannedAt": utc_now(),
+            "files": [{
+                "relativePath": root.name,
+                "size": st.st_size,
+                "modifiedTime": st.st_mtime,
+                "sha256": sha256_file(root),
+            }],
+            "excluded": [],
+        }
     patterns = list(exclude_patterns or DEFAULT_EXCLUDES)
     iterator = root.rglob("*") if recursive else root.glob("*")
     files, excluded = [], []

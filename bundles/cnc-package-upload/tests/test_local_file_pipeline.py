@@ -24,6 +24,17 @@ def test_scan_excludes_temporary_files_and_hashes_sources(tmp_path):
     assert out["excluded"][0]["relativePath"] == "~$lock.xlsx"
 
 
+def test_scan_accepts_single_source_file(tmp_path):
+    p = load_module()
+    source = tmp_path / "M02_CTC_CTR_FAC_01_Bien ban nghiem thu.pdf"
+    source.write_text("hello", encoding="utf-8")
+    out = p.scan_folder(source)
+    assert out["sourceRoot"] == str(tmp_path)
+    assert [x["relativePath"] for x in out["files"]] == [source.name]
+    assert len(out["files"][0]["sha256"]) == 64
+    assert out["excluded"] == []
+
+
 def test_plan_applies_agent_old_prefix_decision_and_routes_destination(tmp_path):
     p = load_module()
     scan = {"sourceRoot": str(tmp_path), "files": [{"relativePath": "M02_TDO_MEP02_Bao cao.pdf", "size": 3, "sha256": "a" * 64}]}

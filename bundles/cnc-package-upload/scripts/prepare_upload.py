@@ -305,6 +305,7 @@ def infer_sequence_value(text: str, field: str) -> str | None:
 
 def file_name_decision(relative_path: str, result: dict, matrix: dict, masters: dict) -> dict:
     stem = Path(relative_path).stem
+    stem = re.sub(r"-[0-9a-f]{12}$", "", stem, flags=re.IGNORECASE)
     code = str(result.get("DocumentCode", "")).strip()
     if code:
         if stem.casefold() == code.casefold():
@@ -317,6 +318,14 @@ def file_name_decision(relative_path: str, result: dict, matrix: dict, masters: 
                     "oldPrefixToRemove": stem[:len(code)],
                     "cleanBaseName": stem[len(prefix):].strip(" _-"),
                 }
+        shorthand = shorthand_contract_child_prefix(stem, result)
+        if shorthand:
+            prefix = shorthand["prefix"]
+            return {
+                "status": "agent_decided",
+                "oldPrefixToRemove": prefix,
+                "cleanBaseName": stem[len(prefix):].strip(" _-"),
+            }
     detected = document_code_engine.detect_existing_prefix(relative_path, matrix, masters)
     if detected["status"] in {"unique_match", "no_prefix"}:
         if detected["status"] == "unique_match":
@@ -346,6 +355,28 @@ def file_name_decision(relative_path: str, result: dict, matrix: dict, masters: 
                         "cleanBaseName": stem[len(prefix):].strip(" _-"),
                     }
     return {"status": "agent_decided", "oldPrefixToRemove": None, "cleanBaseName": stem}
+
+
+def shorthand_contract_child_prefix(stem: str, result: dict) -> dict | None:
+    components = result.get("components", {})
+    project = str(components.get("DuAn") or "").strip()
+    contractor = str(components.get("NhaThau") or "").strip()
+    code = str(result.get("DocumentCode") or "").strip()
+    parts = [part for part in code.split("_") if part]
+    if not project or not contractor or "CTR" not in parts:
+        return None
+    ctr_index = parts.index("CTR")
+    child = next((part for part in parts[ctr_index + 1:] if part in {"IPC", "VO", "PL", "FAC"}), None)
+    if child is None:
+        return None
+    pattern = re.compile(
+        rf"^{re.escape(project)}_{re.escape(contractor)}_CTR_{re.escape(child)}(?:_(?P<seq>\d{{1,3}}))?(?=$|[_\-\s])",
+        re.IGNORECASE,
+    )
+    match = pattern.match(stem)
+    if not match:
+        return None
+    return {"prefix": match.group(0)}
 
 
 def prepare_business_values(values: dict, request_context: str, matrix: dict) -> dict:
@@ -418,7 +449,8 @@ def plan_batch(args: argparse.Namespace) -> dict:
     if document_type is None:
         raise RuntimeError(f"Document type is ambiguous or unsupported: {args.document_type}")
     rule = matrix["rules"][document_type]
-    request_context = " ".join(filter(None, (args.document_type, getattr(args, "request_context", ""))))
+    scan_filenames = " ".join(item.get("relativePath", "") for item in scan.get("files", []))
+    request_context = " ".join(filter(None, (args.document_type, getattr(args, "request_context", ""), scan_filenames)))
     supplied_values, destination_ignored = separate_destination_package(
         parse_values(args.value), context["package"]["packageFolderName"]
     )

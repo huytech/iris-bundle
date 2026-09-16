@@ -133,6 +133,26 @@ def test_file_name_decision_prefers_full_old_code_over_shared_new_parent_prefix(
     }
 
 
+def test_file_name_decision_removes_auto_intake_hash_and_shorthand_contract_child_prefix():
+    matrix = prepare_upload.document_code_engine.load_matrix(ROOT / "config" / "document-code-matrix.json")
+    masters = {"DuAn": {"M02"}, "GoiThau": set(), "PhapNhan": {"TTDN"}, "NhaThau": {"CTC"}}
+    result = {
+        "DocumentCode": "M02_TTDN_CTC_CTR_03_FAC",
+        "components": {"DuAn": "M02", "NhaThau": "CTC"},
+    }
+    decision = prepare_upload.file_name_decision(
+        "M02_CTC_CTR_FAC_01_Bien ban nghiem thu-59b26c2f11ec.pdf",
+        result,
+        matrix,
+        masters,
+    )
+    assert decision == {
+        "status": "agent_decided",
+        "oldPrefixToRemove": "M02_CTC_CTR_FAC_01",
+        "cleanBaseName": "Bien ban nghiem thu",
+    }
+
+
 def test_file_name_decision_removes_partial_new_code_prefix():
     matrix = prepare_upload.document_code_engine.load_matrix(ROOT / "config" / "document-code-matrix.json")
     masters = {"DuAn": {"M01"}, "GoiThau": {"ELV01"}, "PhapNhan": set(), "NhaThau": set()}
@@ -341,6 +361,47 @@ def test_plan_batch_does_not_validate_irrelevant_tender_package_for_ipc(monkeypa
     assert result["status"] == "ready"
     assert result["ignoredFields"] == ["GoiThau"]
     assert "M02_TTDN_CTC_CTR_01_IPC_01" in result["previewMarkdown"]
+
+
+def test_plan_batch_uses_scan_filename_when_user_adds_contract_details(monkeypatch, tmp_path):
+    scan_path = tmp_path / "scan.json"
+    snapshot_path = tmp_path / "master.json"
+    context_path = tmp_path / "prepare-context.json"
+    scan_path.write_text(__import__("json").dumps({
+        "sourceRoot": "source",
+        "files": [{
+            "relativePath": "M02_CTC_CTR_FAC_01_Bien ban nghiem thu-59b26c2f11ec.pdf",
+            "size": 1,
+            "sha256": "aa",
+        }],
+        "excluded": [],
+    }), encoding="utf-8")
+    snapshot_path.write_text(__import__("json").dumps({
+        "lists": {
+            "projects": {"items": [{"code": "M02", "name": "M02"}]},
+            "legalEntities": {"items": [{"code": "TTDN", "name": "TTDN"}]},
+            "contractors": {"items": [{"code": "CTC", "name": "CTC"}]},
+            "packages": {"items": []},
+        },
+    }), encoding="utf-8")
+    context_path.write_text(__import__("json").dumps({
+        "scanPath": str(scan_path),
+        "masterData": {"snapshotPath": str(snapshot_path)},
+        "package": {"packageFolderName": "M02", "planPath": "package.json"},
+    }), encoding="utf-8")
+    monkeypatch.setattr(prepare_upload.sp_cnc_upload_ops, "load_config", lambda *_: {})
+    monkeypatch.setattr(prepare_upload.sp_cnc_upload_ops, "check_collisions", lambda *_: {"ok": True, "checked": [], "collisions": []})
+    args = SimpleNamespace(
+        context=str(context_path),
+        document_type="FAC",
+        request_context="hop dong 03 cua TTDN",
+        value=["PhapNhan=TTDN", "ContractSequence=03"],
+    )
+    result = prepare_upload.plan_batch(args)
+    assert result["status"] == "ready"
+    assert "M02_TTDN_CTC_CTR_03_FAC_Bien ban nghiem thu.pdf" in result["previewMarkdown"]
+    planned = prepare_upload.local_file_pipeline._read(tmp_path / "plan.json")
+    assert planned["files"][0]["newFileName"] == "M02_TTDN_CTC_CTR_03_FAC_Bien ban nghiem thu.pdf"
 
 
 def test_all_executable_document_types_have_routes():
