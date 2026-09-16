@@ -17,6 +17,8 @@ Không hỏi lại source khi file/folder đã nằm trong tin nhắn, attachmen
 
 Khi chọn folder con, ưu tiên mã tài liệu đã render. Với mã thường, dùng token loại tài liệu 3 ký tự trong `DocumentCode`. Với nhóm hợp đồng, nếu mã chỉ có `CTR` thì vào folder `CTR`; nếu sau `CTR` có `IPC`, `VO`, `PL` hoặc `FAC` thì vào folder tương ứng. Không hỏi lại folder con khi route là duy nhất.
 
+Khi gọi helper, `--document-type` chỉ nhận một mã nghiệp vụ atomic trong matrix như `FAC`, `IPC`, `VO`, `PL` hoặc `CTR`. Nếu tên file có chuỗi như `CTR_FAC`, `CTR_IPC`, `CTR_VO` hoặc `CTR_PL`, đó là ngữ cảnh hợp đồng cộng với loại hồ sơ con; truyền mã con (`FAC`, `IPC`, `VO`, `PL`) làm `--document-type`, không truyền mã ghép.
+
 Nếu `prepare-and-plan` trả `ready`, `fileCount > 0`, `collisionCount = 0`, không có file unresolved và package plan chỉ tạo/bổ sung đúng cây folder template cho package đã suy ra, gửi preview trong chat rồi hỏi user duyệt giống quy trình upload thông thường. Không chạy `execute_upload.py` trước khi user xác nhận preview cụ thể. Auto Intake dừng lại và hỏi đúng một câu khi thiếu dữ kiện nghiệp vụ, có nhiều package/folder trùng, collision, source rỗng, unresolved file hoặc helper trả `invalid`/`blocked`.
 
 ## Chỉ tạo mã
