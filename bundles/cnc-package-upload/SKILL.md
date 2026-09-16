@@ -33,6 +33,8 @@ Ví dụ đúng: `--request-context "Hồ sơ thanh toán đợt 1" --value "Doc
 
 `--package` là tên package/folder đích do user cung cấp. Giá trị này chỉ dùng để xác định nơi upload, không phải metadata và không phải thành phần mã. Không sao chép, suy diễn hoặc chuẩn hóa nó thành `GoiThau`. Chỉ truyền `GoiThau` khi đúng rule mã yêu cầu gói thầu nghiệp vụ và dữ kiện đó có bằng chứng riêng. Nếu agent lặp lại package đích trong `--value`, dùng `DestinationPackage`; script chỉ chấp nhận khi trùng `--package`. Script bỏ qua field không được rule hiện tại sử dụng để field thừa không tạo câu hỏi sai.
 
+Folder con upload được suy ra từ mã tài liệu đã render, không hỏi user lại khi route duy nhất trong template. Với mã thường, dùng document type token trong `DocumentCode` như `PTE`, `BID`, `TDO`. Với nhóm hợp đồng, nếu mã chỉ có `CTR` thì vào folder `CTR`; nếu sau `CTR` có `IPC`, `VO`, `PL` hoặc `FAC` thì route theo token đó. Không route theo filename gốc khi `DocumentCode` đã có, vì filename có thể chứa prefix cũ. Chỉ hỏi user khi không xác định được package/folder đích hoặc có nhiều package/folder trùng khớp.
+
 Nếu `status=needs_user_input`, dùng `question` do script trả về và chỉ hỏi một lần. Sau câu trả lời, gọi `plan-batch` đúng một lần với `contextPath` đã có; không chạy lại scan. Nếu `status=invalid`, báo dữ liệu nào không hợp lệ từ `errors`, không mô tả là thiếu dữ liệu và không hỏi duyệt upload. Nếu `status=blocked`, báo collision và không hỏi duyệt upload. Nếu `status=ready`, gửi nguyên `previewMarkdown` trong chat rồi mới hỏi xác nhận bằng một câu ngắn.
 
 Không xin xác nhận nếu `fileCount=0`, `unresolvedFileCount>0`, preview thiếu file hoặc status khác `ready`. Số dòng dữ liệu trong preview phải bằng số file nguồn hợp lệ đã scan.

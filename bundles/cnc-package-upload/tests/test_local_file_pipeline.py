@@ -58,6 +58,45 @@ def test_plan_keeps_original_stem_without_agent_decision(tmp_path):
     assert f["newFileName"] == "M01_TDO_MEP01_M02_TDO_MEP02_Bao cao.pdf"
 
 
+def test_plan_routes_from_rendered_document_code_when_components_are_missing(tmp_path):
+    p = load_module()
+    scan = {"sourceRoot": str(tmp_path), "files": [{"relativePath": "M01_PTE old name.xlsx", "size": 1, "sha256": "a" * 64}]}
+    result = {"status": "ready", "DocumentCode": "M01_PTE_ELV01", "fileNameDecision": {"status": "keep_original", "cleanBaseName": "old name"}}
+    plan = p.build_plan(scan, {"M01_PTE old name.xlsx": result}, {"PTE": "01. PRE-TENDER/05. PTE"}, "PKG")
+    assert plan["files"][0]["destinationRelativePath"] == "PKG/01. PRE-TENDER/05. PTE"
+    assert plan["state"] == "planned"
+
+
+def test_plan_routes_contract_codes_by_contract_child_token(tmp_path):
+    p = load_module()
+    scan = {"sourceRoot": str(tmp_path), "files": [
+        {"relativePath": "contract.pdf", "size": 1, "sha256": "a" * 64},
+        {"relativePath": "ipc.pdf", "size": 1, "sha256": "b" * 64},
+        {"relativePath": "vo.pdf", "size": 1, "sha256": "c" * 64},
+        {"relativePath": "pl.pdf", "size": 1, "sha256": "d" * 64},
+        {"relativePath": "fac.pdf", "size": 1, "sha256": "e" * 64},
+    ]}
+    base = {"status": "ready", "fileNameDecision": {"status": "keep_original", "cleanBaseName": "file"}}
+    codes = {
+        "contract.pdf": {**base, "DocumentCode": "M01_TTDN_CTC_CTR_01"},
+        "ipc.pdf": {**base, "DocumentCode": "M01_TTDN_CTC_CTR_01_IPC_01"},
+        "vo.pdf": {**base, "DocumentCode": "M01_TTDN_CTC_CTR_01_VO_01"},
+        "pl.pdf": {**base, "DocumentCode": "M01_TTDN_CTC_CTR_01_PL_01"},
+        "fac.pdf": {**base, "DocumentCode": "M01_TTDN_CTC_CTR_01_FAC"},
+    }
+    routes = {"CTR": "03. CONTRACT/01. CTR", "IPC": "04. POST-CONTRACT/01. IPC", "VO": "04. POST-CONTRACT/02. VO", "PL": "03. CONTRACT/02. APL", "FAC": "04. POST-CONTRACT/03. FAC"}
+    plan = p.build_plan(scan, codes, routes, "PKG")
+    destinations = {item["sourceRelativePath"]: item["destinationRelativePath"] for item in plan["files"]}
+    assert destinations == {
+        "contract.pdf": "PKG/03. CONTRACT/01. CTR",
+        "ipc.pdf": "PKG/04. POST-CONTRACT/01. IPC",
+        "vo.pdf": "PKG/04. POST-CONTRACT/02. VO",
+        "pl.pdf": "PKG/03. CONTRACT/02. APL",
+        "fac.pdf": "PKG/04. POST-CONTRACT/03. FAC",
+    }
+    assert plan["state"] == "planned"
+
+
 def test_plan_blocks_when_agent_marks_filename_decision_needed(tmp_path):
     p = load_module()
     scan = {"sourceRoot": str(tmp_path), "files": [{"relativePath": "old_name.pdf", "size": 1, "sha256": "a" * 64}]}

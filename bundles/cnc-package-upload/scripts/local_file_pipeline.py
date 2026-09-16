@@ -98,6 +98,22 @@ def _filename_decision(result: dict, rel: str):
     return old_prefix, clean, "agent" if decision else "original"
 
 
+def document_type_for_route(result: dict) -> str | None:
+    code = str(result.get("DocumentCode") or "").strip().upper()
+    parts = [part for part in code.split("_") if part]
+    if "CTR" in parts:
+        ctr_index = parts.index("CTR")
+        for contract_child in ("IPC", "VO", "PL", "FAC"):
+            if contract_child in parts[ctr_index + 1:]:
+                return contract_child
+        return "CTR"
+    components = result.get("components", {})
+    dtype = components.get("LoaiTaiLieu") or result.get("documentTypeCode")
+    if dtype:
+        return str(dtype).strip().upper()
+    return parts[1] if len(parts) > 1 else None
+
+
 def build_plan(scan, code_results, routing, package_folder_name):
     package = str(package_folder_name).strip()
     if not package or INVALID_NAME_CHARS.search(package):
@@ -112,7 +128,7 @@ def build_plan(scan, code_results, routing, package_folder_name):
             planned.append({"sourceRelativePath": rel, "state": "needs_user_input", "codeResult": result})
             continue
         components = result.get("components", {})
-        dtype = components.get("LoaiTaiLieu") or result.get("documentTypeCode")
+        dtype = document_type_for_route(result)
         route = routing.get(dtype)
         if not route:
             planned.append({"sourceRelativePath": rel, "state": "needs_user_input", "reason": "NO_FOLDER_ROUTE", "codeResult": result})

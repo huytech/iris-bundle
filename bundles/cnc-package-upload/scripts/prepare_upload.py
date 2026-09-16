@@ -303,6 +303,41 @@ def infer_sequence_value(text: str, field: str) -> str | None:
     return infer_document_sequence(stripped)
 
 
+def file_name_decision(relative_path: str, result: dict, matrix: dict, masters: dict) -> dict:
+    stem = Path(relative_path).stem
+    code = str(result.get("DocumentCode", "")).strip()
+    if code:
+        if stem.casefold() == code.casefold():
+            return {"status": "agent_decided", "oldPrefixToRemove": stem, "cleanBaseName": ""}
+        for separator in ("_", "-", " "):
+            prefix = code + separator
+            if stem.casefold().startswith(prefix.casefold()):
+                return {
+                    "status": "agent_decided",
+                    "oldPrefixToRemove": stem[:len(code)],
+                    "cleanBaseName": stem[len(prefix):].strip(" _-"),
+                }
+        code_parts = code.split("_")
+        for part_count in range(len(code_parts) - 1, 1, -1):
+            candidate = "_".join(code_parts[:part_count])
+            if stem.casefold() == candidate.casefold():
+                return {"status": "agent_decided", "oldPrefixToRemove": stem, "cleanBaseName": ""}
+            for separator in ("_", "-", " "):
+                prefix = candidate + separator
+                if stem.casefold().startswith(prefix.casefold()):
+                    return {
+                        "status": "agent_decided",
+                        "oldPrefixToRemove": stem[:len(candidate)],
+                        "cleanBaseName": stem[len(prefix):].strip(" _-"),
+                    }
+    detected = document_code_engine.detect_existing_prefix(relative_path, matrix, masters)
+    return {
+        "status": "agent_decided" if detected["status"] in {"unique_match", "no_prefix"} else "needs_user_input",
+        "oldPrefixToRemove": detected.get("prefix"),
+        "cleanBaseName": detected.get("cleanBaseName", stem),
+    }
+
+
 def prepare_business_values(values: dict, request_context: str, matrix: dict) -> dict:
     prepared = dict(values)
     if not prepared.get("DocumentSequence"):
@@ -451,12 +486,7 @@ def plan_batch(args: argparse.Namespace) -> dict:
         }
     masters = master_sets(snapshot)
     for relative_path, result in codes.get("results", {}).items():
-        detected = document_code_engine.detect_existing_prefix(relative_path, matrix, masters)
-        result["fileNameDecision"] = {
-            "status": "agent_decided" if detected["status"] in {"unique_match", "no_prefix"} else "needs_user_input",
-            "oldPrefixToRemove": detected.get("prefix"),
-            "cleanBaseName": detected.get("cleanBaseName", Path(relative_path).stem),
-        }
+        result["fileNameDecision"] = file_name_decision(relative_path, result, matrix, masters)
     routing = local_file_pipeline._read(base / "config/folder-routing.json")["routingByDocumentType"]
     package = context["package"]["packageFolderName"]
     plan = local_file_pipeline.build_plan(scan, codes["results"], routing, package)
