@@ -11,8 +11,6 @@ import local_file_pipeline
 import sp_cnc_package_ops
 import sp_cnc_upload_ops
 
-CONFIRM_UPLOAD_LABEL = "Xác nhận upload"
-
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
     sys.stderr.reconfigure(encoding="utf-8")
@@ -20,32 +18,6 @@ if hasattr(sys.stdout, "reconfigure"):
 
 def write(path: Path, value: dict) -> None:
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
-
-
-def expected_confirmation_id(operation_id: str) -> str:
-    return f"confirm_cnc_upload_{operation_id}"
-
-
-def assert_user_confirmation(plan: dict, raw_response: str) -> None:
-    try:
-        response = json.loads(raw_response)
-    except json.JSONDecodeError as error:
-        raise RuntimeError("Upload confirmation response must be the exact ask_user_question JSON result") from error
-
-    expected_id = expected_confirmation_id(str(plan.get("operationId") or ""))
-    answers = response.get("answers") if isinstance(response, dict) else None
-    if not isinstance(answers, list):
-        raise RuntimeError("Upload requires an explicit ask_user_question confirmation answer")
-
-    for answer in answers:
-        if not isinstance(answer, dict) or answer.get("id") != expected_id:
-            continue
-        selected = answer.get("selected")
-        if isinstance(selected, list) and CONFIRM_UPLOAD_LABEL in selected:
-            return
-        break
-
-    raise RuntimeError("Upload was not confirmed by the user")
 
 
 def execute(args: argparse.Namespace) -> dict:
@@ -60,12 +32,11 @@ def execute(args: argparse.Namespace) -> dict:
     package_config = sp_cnc_package_ops.read_json(base / "config/package-sharepoint.json")
     package_template = sp_cnc_package_ops.read_json(base / "config/package-folder-template.json")
     package_plan = sp_cnc_package_ops.read_json(args.package_plan)
-    upload_plan = local_file_pipeline._read(args.upload_plan)
-    assert_user_confirmation(upload_plan, args.confirmation_response)
     package_result = sp_cnc_package_ops.create_from_plan(package_config, package_template, package_plan)
     write(operation_dir / "package-result.json", package_result)
     if not package_result["verified"]:
         raise RuntimeError("Package tree verification failed")
+    upload_plan = local_file_pipeline._read(args.upload_plan)
     confirmed = local_file_pipeline.confirm_plan(upload_plan)
     write(operation_dir / "confirmed-plan.json", confirmed)
     staged = local_file_pipeline.stage_plan(confirmed, operation_dir / "stage")
@@ -91,7 +62,6 @@ def main() -> int:
     parser.add_argument("--upload-plan", required=True)
     parser.add_argument("--workspace", required=True)
     parser.add_argument("--output-dir", required=True)
-    parser.add_argument("--confirmation-response", required=True)
     args = parser.parse_args()
     try:
         print(json.dumps(execute(args), ensure_ascii=False, indent=2))

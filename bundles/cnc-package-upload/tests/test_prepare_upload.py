@@ -322,7 +322,6 @@ def test_plan_batch_does_not_validate_irrelevant_tender_package_for_ipc(monkeypa
     )
     result = prepare_upload.plan_batch(args)
     assert result["status"] == "ready"
-    assert result["operationId"].startswith("cnc-")
     assert result["ignoredFields"] == ["GoiThau"]
     assert "M02_TTDN_CTC_CTR_01_IPC_01" in result["previewMarkdown"]
 

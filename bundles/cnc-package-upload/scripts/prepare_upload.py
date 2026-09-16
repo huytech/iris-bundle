@@ -528,7 +528,6 @@ def plan_batch(args: argparse.Namespace) -> dict:
         "documentTypeCode": document_type,
         "fileCount": len(items),
         "collisionCount": len(collisions["collisions"]),
-        "operationId": plan["operationId"],
         "ignoredFields": ignored_fields,
         "previewMarkdown": markdown,
         **{key: str(value) for key, value in paths.items()},

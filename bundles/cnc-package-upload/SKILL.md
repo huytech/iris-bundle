@@ -41,18 +41,18 @@ Nếu `status=needs_user_input`, dùng `question` do script trả về và chỉ
 
 Không xin xác nhận nếu `fileCount=0`, `unresolvedFileCount>0`, preview thiếu file hoặc status khác `ready`. Số dòng dữ liệu trong preview phải bằng số file nguồn hợp lệ đã scan.
 
-Preview chi tiết luôn là assistant message trong chat với bảng dễ đọc như nguồn, mã tài liệu, tên file mới, destination, metadata và collision. Chỉ sau khi message preview đã hiển thị mới gọi `ask_user_question`. Popup chỉ hỏi một câu ngắn nêu package và số file; không lặp bảng, đường dẫn dài, metadata hoặc danh sách folder trong câu hỏi. Question id phải là `confirm_cnc_upload_<operationId>` lấy từ plan, và option xác nhận upload phải có label chính xác `Xác nhận upload`. Trạng thái chờ hỏi sẽ để Desktop gửi notification cho user khi cửa sổ không focus.
+Preview chi tiết luôn là assistant message trong chat với bảng dễ đọc như nguồn, mã tài liệu, tên file mới, destination, metadata và collision. Chỉ sau khi message preview đã hiển thị mới gọi `ask_user_question`. Popup chỉ hỏi một câu ngắn nêu package và số file; không lặp bảng, đường dẫn dài, metadata hoặc danh sách folder trong câu hỏi. Trạng thái chờ hỏi sẽ để Desktop gửi notification cho user khi cửa sổ không focus.
 
 Không dùng `todo_write` cho workflow này. Không đọc lại context, snapshot, matrix hoặc output JSON khi stdout đã có status, question hoặc preview. Không gọi `--describe-type` trong luồng upload. Không gọi lại `prepare-and-plan` để dò input. Chỉ tạo subagent khi nhiều file cần đọc nội dung độc lập; không tạo subagent để scan, tra master, render mã, build plan hoặc kiểm tra package/collision.
 
 ## Sau xác nhận
 
-Không tạo folder, stage hoặc upload trước khi user duyệt preview cụ thể. Sau khi gọi `ask_user_question`, chỉ được tiếp tục nếu tool result có `answers` chứa đúng question id `confirm_cnc_upload_<operationId>` và `selected` chứa `Xác nhận upload`. Nếu tool result là `{}`, `answers` rỗng, timeout, user đóng popup, hoặc user chọn `Chưa upload`, dừng tại preview và báo chưa upload. Không suy đoán sự im lặng, popup bị bỏ qua hoặc kết quả rỗng là đồng ý. Sau khi duyệt:
+Không tạo folder, stage hoặc upload trước khi user duyệt preview cụ thể. Sau khi duyệt:
 
 Sau confirmation, chỉ chạy một command; không gọi riêng create/confirm/stage/collision/upload và không tự chọn config:
 
 ```bash
-python scripts/execute_upload.py --package-plan "<packagePlanPath>" --upload-plan "<uploadPlanPath>" --workspace "<agentWorkingDirectory>" --output-dir ".cnc-work/<packageFolderName>/execute" --confirmation-response '<exact ask_user_question JSON result>'
+python scripts/execute_upload.py --package-plan "<packagePlanPath>" --upload-plan "<uploadPlanPath>" --workspace "<agentWorkingDirectory>" --output-dir ".cnc-work/<packageFolderName>/execute"
 ```
 
 Script xác minh plan package, tạo và verify folder đã duyệt, confirm plan upload, stage bản copy, kiểm tra collision cuối, upload, gán metadata, đọc lại verify và chỉ cleanup khi toàn bộ thành công. Lỗi giữa chừng giữ output/checkpoint và staging để điều tra hoặc retry.
