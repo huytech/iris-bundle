@@ -451,6 +451,11 @@ def preview_markdown(plan: dict, collisions: dict) -> str:
     return "\n".join(rows)
 
 
+def remember_resolved_values(context_path: Path, context: dict, values: dict) -> None:
+    context["resolvedValues"] = values
+    write_json(context_path, context)
+
+
 def plan_batch(args: argparse.Namespace) -> dict:
     context_path = Path(args.context).resolve()
     context = local_file_pipeline._read(context_path)
@@ -472,9 +477,10 @@ def plan_batch(args: argparse.Namespace) -> dict:
     rule = matrix["rules"][document_type]
     scan_filenames = " ".join(item.get("relativePath", "") for item in scan.get("files", []))
     request_context = " ".join(filter(None, (args.document_type, getattr(args, "request_context", ""), scan_filenames)))
-    supplied_values, destination_ignored = separate_destination_package(
-        parse_values(args.value), context["package"]["packageFolderName"]
-    )
+    previous_values = context.get("resolvedValues")
+    supplied = previous_values.copy() if isinstance(previous_values, dict) else {}
+    supplied.update(parse_values(args.value))
+    supplied_values, destination_ignored = separate_destination_package(supplied, context["package"]["packageFolderName"])
     supplied_values = infer_master_values_from_request(supplied_values, request_context, snapshot)
     supplied_values, rule_ignored = values_for_rule(supplied_values, rule)
     ignored_fields = destination_ignored + rule_ignored
@@ -493,6 +499,7 @@ def plan_batch(args: argparse.Namespace) -> dict:
         request_context,
         matrix,
     )
+    remember_resolved_values(context_path, context, values)
     if values.get("ParentContractCode"):
         parent = document_code_engine.parse_contract_code(values["ParentContractCode"], matrix)
         parent_values, parent_issues = validate_business_values(parent, snapshot)

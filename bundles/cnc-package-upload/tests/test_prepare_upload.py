@@ -314,6 +314,41 @@ def test_plan_batch_returns_business_question_before_collision_check(monkeypatch
     assert "DocumentSequence" not in result["question"]
 
 
+def test_plan_batch_reuses_resolved_values_when_user_adds_missing_field(monkeypatch, tmp_path):
+    scan_path = tmp_path / "scan.json"
+    snapshot_path = tmp_path / "master.json"
+    package_path = tmp_path / "package.json"
+    context_path = tmp_path / "prepare-context.json"
+    scan_path.write_text('{"sourceRoot":"source","files":[{"relativePath":"a.pdf","size":1,"sha256":"aa"}],"excluded":[]}', encoding="utf-8")
+    snapshot_path.write_text('{"lists":{"projects":{"items":[{"code":"M02"}]},"packages":{"items":[]},"legalEntities":{"items":[{"code":"TTDN"}]},"contractors":{"items":[{"code":"CTC"}]}}}', encoding="utf-8")
+    package_path.write_text('{}', encoding="utf-8")
+    context_path.write_text(__import__("json").dumps({
+        "scanPath": str(scan_path),
+        "masterData": {"snapshotPath": str(snapshot_path)},
+        "package": {"packageFolderName": "TTG.003", "planPath": str(package_path)},
+    }), encoding="utf-8")
+    monkeypatch.setattr(prepare_upload.sp_cnc_upload_ops, "load_config", lambda *_: {})
+    monkeypatch.setattr(prepare_upload.sp_cnc_upload_ops, "check_collisions", lambda *_: {"ok": True, "checked": [], "collisions": []})
+
+    first = prepare_upload.plan_batch(SimpleNamespace(
+        context=str(context_path),
+        document_type="CTR",
+        request_context="file há»£p Ä‘á»“ng mua bÃ¡n Ä‘á»£t 1 TTDN, CTC",
+        value=["PhapNhan=TTDN", "NhaThau=CTC", "ContractSequence=1"],
+    ))
+    assert first["status"] == "needs_user_input"
+    assert first["missingFields"] == ["DuAn"]
+
+    second = prepare_upload.plan_batch(SimpleNamespace(
+        context=str(context_path),
+        document_type="CTR",
+        request_context="dá»± Ã¡n M02",
+        value=["DuAn=M02"],
+    ))
+    assert second["status"] == "ready"
+    assert "M02_TTDN_CTC_CTR_01" in second["previewMarkdown"]
+
+
 def test_plan_batch_preserves_invalid_code_errors(monkeypatch, tmp_path):
     scan_path = tmp_path / "scan.json"
     snapshot_path = tmp_path / "master.json"
