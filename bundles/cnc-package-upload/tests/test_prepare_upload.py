@@ -153,6 +153,26 @@ def test_file_name_decision_removes_auto_intake_hash_and_shorthand_contract_chil
     }
 
 
+def test_file_name_decision_removes_shorthand_contract_prefix():
+    matrix = prepare_upload.document_code_engine.load_matrix(ROOT / "config" / "document-code-matrix.json")
+    masters = {"DuAn": {"M02"}, "GoiThau": set(), "PhapNhan": {"TTDN"}, "NhaThau": {"CTC"}}
+    result = {
+        "DocumentCode": "M02_TTDN_CTC_CTR_03",
+        "components": {"DuAn": "M02", "NhaThau": "CTC"},
+    }
+    decision = prepare_upload.file_name_decision(
+        "M02_CTC_CTR_03_Hop dong thi cong.pdf",
+        result,
+        matrix,
+        masters,
+    )
+    assert decision == {
+        "status": "agent_decided",
+        "oldPrefixToRemove": "M02_CTC_CTR_03",
+        "cleanBaseName": "Hop dong thi cong",
+    }
+
+
 def test_file_name_decision_removes_partial_new_code_prefix():
     matrix = prepare_upload.document_code_engine.load_matrix(ROOT / "config" / "document-code-matrix.json")
     masters = {"DuAn": {"M01"}, "GoiThau": {"ELV01"}, "PhapNhan": set(), "NhaThau": set()}

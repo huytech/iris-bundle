@@ -318,7 +318,7 @@ def file_name_decision(relative_path: str, result: dict, matrix: dict, masters: 
                     "oldPrefixToRemove": stem[:len(code)],
                     "cleanBaseName": stem[len(prefix):].strip(" _-"),
                 }
-        shorthand = shorthand_contract_child_prefix(stem, result)
+        shorthand = shorthand_contract_child_prefix(stem, result) or shorthand_contract_prefix(stem, result)
         if shorthand:
             prefix = shorthand["prefix"]
             return {
@@ -371,6 +371,27 @@ def shorthand_contract_child_prefix(stem: str, result: dict) -> dict | None:
         return None
     pattern = re.compile(
         rf"^{re.escape(project)}_{re.escape(contractor)}_CTR_{re.escape(child)}(?:_(?P<seq>\d{{1,3}}))?(?=$|[_\-\s])",
+        re.IGNORECASE,
+    )
+    match = pattern.match(stem)
+    if not match:
+        return None
+    return {"prefix": match.group(0)}
+
+
+def shorthand_contract_prefix(stem: str, result: dict) -> dict | None:
+    components = result.get("components", {})
+    project = str(components.get("DuAn") or "").strip()
+    contractor = str(components.get("NhaThau") or "").strip()
+    code = str(result.get("DocumentCode") or "").strip()
+    parts = [part for part in code.split("_") if part]
+    if not project or not contractor or "CTR" not in parts:
+        return None
+    ctr_index = parts.index("CTR")
+    if any(part in {"IPC", "VO", "PL", "FAC"} for part in parts[ctr_index + 1:]):
+        return None
+    pattern = re.compile(
+        rf"^{re.escape(project)}_{re.escape(contractor)}_CTR(?:_(?P<seq>\d{{1,3}}))?(?=$|[_\-\s])",
         re.IGNORECASE,
     )
     match = pattern.match(stem)
