@@ -59,3 +59,54 @@ def test_create_from_plan_uses_only_approved_missing_paths(monkeypatch):
     result = package_ops.create_from_plan(config, template, plan)
     assert created == [("drive", "root", "PKG"), ("drive", "root/PKG", "child")]
     assert result["verified"] is True
+
+
+def test_create_updates_folder_description_metadata(monkeypatch):
+    config = {
+        "siteUrl": "site",
+        "libraryName": "lib",
+        "packageRootPath": "root",
+        "folderMetadata": {
+            "enabled": True,
+            "descriptionField": "MoTaLoaiTaiLieu",
+            "descriptionDisplayName": "Mô tả loại tài liệu",
+            "mirrorDescriptionFields": ["_ExtendedDescription"],
+        },
+    }
+    template = {"folders": [{"path": "01. PRE-TENDER/01. COP", "description": "Kế hoạch ngân sách cho dự án"}]}
+    previews = [
+        {"siteUrl": "site", "libraryName": "lib", "driveId": "drive", "packageRootPath": "root", "packageFolderName": "PKG", "missing": ["root/PKG", "root/PKG/01. PRE-TENDER", "root/PKG/01. PRE-TENDER/01. COP"], "verified": False},
+        {"siteUrl": "site", "libraryName": "lib", "driveId": "drive", "packageRootPath": "root", "packageFolderName": "PKG", "missing": [], "verified": True},
+    ]
+    monkeypatch.setattr(package_ops, "preview", lambda *_: previews.pop(0))
+    monkeypatch.setattr(package_ops, "create_folder", lambda *_: {"id": "created"})
+    monkeypatch.setattr(package_ops, "ensure_text_column", lambda *_: {"status": "existing"})
+    monkeypatch.setattr(
+        package_ops,
+        "items_by_path",
+        lambda _drive, paths: {path: {"id": path.rsplit("/", 1)[-1]} for path in paths},
+    )
+    patched = []
+    monkeypatch.setattr(package_ops, "update_item_fields", lambda drive, item, fields: patched.append((drive, item, fields)))
+    monkeypatch.setattr(package_ops, "get_item_fields", lambda _drive, _item: {"MoTaLoaiTaiLieu": "Kế hoạch ngân sách cho dự án", "_ExtendedDescription": "Kế hoạch ngân sách cho dự án"})
+    result = package_ops.create(config, template, "PKG")
+    assert patched == [
+        (
+            "drive",
+            "01. COP",
+            {
+                "MoTaLoaiTaiLieu": "Kế hoạch ngân sách cho dự án",
+                "_ExtendedDescription": "Kế hoạch ngân sách cho dự án",
+            },
+        )
+    ]
+    assert result["metadataUpdated"] == [
+        {
+            "path": "root/PKG/01. PRE-TENDER/01. COP",
+            "fields": {
+                "MoTaLoaiTaiLieu": "Kế hoạch ngân sách cho dự án",
+                "_ExtendedDescription": "Kế hoạch ngân sách cho dự án",
+            },
+            "verified": True,
+        }
+    ]

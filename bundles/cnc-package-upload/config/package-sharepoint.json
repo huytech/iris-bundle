@@ -4,6 +4,12 @@
   "libraryName": "AIT DATA",
   "packageRootPath": "90 TENDER DEMO",
   "folderNameSource": "user_input_verbatim",
+  "folderMetadata": {
+    "enabled": true,
+    "descriptionField": "MoTaLoaiTaiLieu",
+    "descriptionDisplayName": "Mô tả loại tài liệu",
+    "mirrorDescriptionFields": ["_ExtendedDescription"]
+  },
   "trimOuterWhitespace": true,
   "autoNormalizeFolderName": false,
   "invalidCharacters": ["\"", "*", ":", "<", ">", "?", "/", "\\", "|"],

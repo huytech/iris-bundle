@@ -136,6 +136,83 @@ def create_folder(drive_id: str, parent_path: str, name: str):
     return req("POST", url, body=body)
 
 
+def list_columns(drive_id: str):
+    return req("GET", f"{GRAPH}/drives/{drive_id}/list/columns").get("value", [])
+
+
+def ensure_text_column(drive_id: str, internal_name: str, display_name: str):
+    for column in list_columns(drive_id):
+        if column.get("name") == internal_name:
+            return {"status": "existing", "name": column.get("name"), "displayName": column.get("displayName"), "id": column.get("id")}
+    created = req(
+        "POST",
+        f"{GRAPH}/drives/{drive_id}/list/columns",
+        body={"name": internal_name, "displayName": display_name, "text": {}},
+    )
+    return {"status": "created", "name": created.get("name"), "displayName": created.get("displayName"), "id": created.get("id")}
+
+
+def update_item_fields(drive_id: str, item_id: str, fields: dict):
+    return req("PATCH", f"{GRAPH}/drives/{drive_id}/items/{item_id}/listItem/fields", body=fields)
+
+
+def get_item_fields(drive_id: str, item_id: str):
+    return req("GET", f"{GRAPH}/drives/{drive_id}/items/{item_id}/listItem/fields")
+
+
+def folder_metadata_config(config: dict):
+    spec = config.get("folderMetadata")
+    if not isinstance(spec, dict) or not spec.get("enabled"):
+        return None
+    field = str(spec.get("descriptionField") or "").strip()
+    if not field:
+        raise SpError("folderMetadata.descriptionField is required when folder metadata is enabled")
+    mirrors = [str(value).strip() for value in spec.get("mirrorDescriptionFields", []) if str(value).strip()]
+    return {
+        "descriptionField": field,
+        "descriptionDisplayName": str(spec.get("descriptionDisplayName") or field).strip(),
+        "mirrorDescriptionFields": mirrors,
+    }
+
+
+def folder_description_by_path(template: dict):
+    descriptions = {}
+    for folder in template.get("folders", []):
+        description = str(folder.get("description") or "").strip()
+        if description:
+            descriptions[folder["path"].strip("/")] = description
+    return descriptions
+
+
+def apply_folder_metadata(config: dict, drive_id: str, root: str, package: str, template: dict):
+    metadata = folder_metadata_config(config)
+    if metadata is None:
+        return []
+    ensure_text_column(drive_id, metadata["descriptionField"], metadata["descriptionDisplayName"])
+    descriptions = folder_description_by_path(template)
+    if not descriptions:
+        return []
+    base = f"{root.strip('/')}/{package}" if root.strip("/") else package
+    paths = [f"{base}/{path}" for path in descriptions]
+    items = items_by_path(drive_id, paths)
+    updated = []
+    for path, item in items.items():
+        if not item:
+            continue
+        relative = path[len(base):].strip("/")
+        description = descriptions.get(relative)
+        if not description:
+            continue
+        field_values = {metadata["descriptionField"]: description}
+        for mirror in metadata["mirrorDescriptionFields"]:
+            field_values[mirror] = description
+        update_item_fields(drive_id, item["id"], field_values)
+        fields = get_item_fields(drive_id, item["id"])
+        verified = all(fields.get(field) == value for field, value in field_values.items())
+        updated.append({"path": path, "fields": field_values, "verified": verified})
+    return updated
+
+
 def validate_package_name(name: str, config: dict):
     trimmed = name.strip() if config.get("trimOuterWhitespace", True) else name
     forbidden = set(config.get("forbiddenNames", []))
@@ -215,7 +292,14 @@ def create_from_plan(config: dict, template: dict, plan: dict):
         create_folder(drive_id, parent, name)
         created.append(path)
     after = preview(config, template, current["packageFolderName"])
-    return {"packageFolderName": current["packageFolderName"], "created": created, "missing": after["missing"], "verified": after["verified"]}
+    metadata = apply_folder_metadata(config, drive_id, current["packageRootPath"], current["packageFolderName"], template)
+    return {
+        "packageFolderName": current["packageFolderName"],
+        "created": created,
+        "missing": after["missing"],
+        "verified": after["verified"],
+        "metadataUpdated": metadata,
+    }
 
 
 def create(config: dict, template: dict, package_name: str):
@@ -232,6 +316,7 @@ def create(config: dict, template: dict, package_name: str):
         create_folder(drive_id, parent, name)
         created.append(path)
     after = preview(config, template, package_name)
+    metadata = apply_folder_metadata(config, drive_id, before["packageRootPath"], before["packageFolderName"], template)
     return {
         "siteUrl": before["siteUrl"],
         "libraryName": before["libraryName"],
@@ -241,12 +326,13 @@ def create(config: dict, template: dict, package_name: str):
         "existing": already_existing,
         "missing": after["missing"],
         "verified": after["verified"],
+        "metadataUpdated": metadata,
     }
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("command", choices=["preview", "create"])
+    ap.add_argument("command", choices=["preview", "create", "ensure-metadata-column"])
     base = Path(__file__).parents[1]
     ap.add_argument("--config", default=str(base / "config/package-sharepoint.json"))
     ap.add_argument("--template", default=str(base / "config/package-folder-template.json"))
@@ -259,7 +345,13 @@ def main(argv=None):
         template = read_json(args.template)
         if config.get("libraryName") == "__REQUIRED__" or config.get("packageRootPath") == "__REQUIRED__":
             raise SpError("libraryName/packageRootPath is __REQUIRED__; ask user first")
-        if args.command == "preview":
+        if args.command == "ensure-metadata-column":
+            drive = resolve_drive(config["siteUrl"], config["libraryName"])
+            metadata = folder_metadata_config(config)
+            if metadata is None:
+                raise SpError("folderMetadata is not enabled")
+            result = ensure_text_column(drive["id"], metadata["descriptionField"], metadata["descriptionDisplayName"])
+        elif args.command == "preview":
             if not args.package_name:
                 raise SpError("preview requires --package")
             result = preview(config, template, args.package_name)
