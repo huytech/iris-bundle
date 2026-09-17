@@ -1,0 +1,1036 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Clean semantic HoSo rule catalog for LLM document-code classification. Use this first; open hoso-rules.json only for source trace or unresolved ambiguity.",
+  "source": {
+    "rawRules": "config/hoso-rules.json",
+    "matrix": "config/document-code-matrix.json",
+    "aliases": "config/classification-aliases.json"
+  },
+  "selectionPolicy": [
+    "Pick exactly one documentTypeCode when evidence clearly maps to one semantic rule.",
+    "Use requiredForCode to decide which business fields must be present before preview.",
+    "Do not invent master codes; values for DuAn, GoiThau, PhapNhan and NhaThau must come from user evidence or active SharePoint master data.",
+    "For parent-contract children IPC, VO, PL and FAC, prefer ParentContractCode when available; otherwise derive it only from DuAn, PhapNhan, NhaThau and ContractSequence.",
+    "When examples and prose conflict, include the ambiguity in evidence and ask one business question unless the ambiguity note resolves it."
+  ],
+  "rules": [
+    {
+      "documentTypeCode": "COP",
+      "sourceRows": [
+        3
+      ],
+      "stage": "1.Trước đầu thầu (Pre-tender)",
+      "businessName": "Kế hoạch ngân sách dự án",
+      "businessIntent": "Kế hoạch ngân sách dự án | Kế hoạch ngân sách dự án (Cost plan) | Lập kế hoạch ngân sách cho dự án",
+      "chooseWhen": [
+        "Use when the document is project-level and does not need tender package or contractor to create the code.",
+        "Có, theo dự án, mỗi dự án 1 file kế hoạch, cost plan có thể chia riêng cho từng phạm vi/phân khu Sẽ được review điều chỉnh hằng năm nên cần có version"
+      ],
+      "aliases": [
+        "cost plan",
+        "ke hoach ngan sach",
+        "kế hoạch ngân sách"
+      ],
+      "requiredForCode": [
+        "DuAn"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_COP",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:COP",
+        "GoiThau": "null",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      },
+      "exampleCodes": [
+        "M01_COP"
+      ],
+      "filenameExamples": [
+        "M01_COP_Kế hoạch ngân sách_Rev01"
+      ],
+      "ambiguities": [
+        "Theo dõi version hằng năm."
+      ],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "MPP",
+      "sourceRows": [
+        4
+      ],
+      "stage": "1.Trước đầu thầu (Pre-tender)",
+      "businessName": "Kế hoạch đấu thầu và mua sắm tổng thể",
+      "businessIntent": "Kế hoạch đấu thầu và mua sắm tổng thể | Kế hoạch đấu thầu và mua sắm tổng thể (MPP) *Kế hoạch này review điều chỉnh hằng năm | Nhận chiến lược đấu thầu từ PM (PD_GĐ dự án_lập kế hoạch đầu thầu và phân chia gói thầu)",
+      "chooseWhen": [
+        "Use when the document is project-level and does not need tender package or contractor to create the code.",
+        "Có, theo dự án, mỗi dự án 1 file kế hoạch đấu thầu, sẽ được review điều chỉnh hằng năm nên cần có version"
+      ],
+      "aliases": [
+        "mpp",
+        "master procurement plan",
+        "kế hoạch đấu thầu và mua sắm"
+      ],
+      "requiredForCode": [
+        "DuAn"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_MPP",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:MPP",
+        "GoiThau": "null",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      },
+      "exampleCodes": [
+        "M01_MPP"
+      ],
+      "filenameExamples": [
+        "M01_MPP_Kế hoạch đấu thầu và mua sắm tổng thể_Rev01"
+      ],
+      "ambiguities": [
+        "Theo dõi version hằng năm."
+      ],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "PKG",
+      "sourceRows": [
+        5
+      ],
+      "stage": "1.Trước đầu thầu (Pre-tender)",
+      "businessName": "Hồ sơ thông tin/định danh gói thầu",
+      "businessIntent": "Hồ sơ thông tin/định danh gói thầu | Hồ sơ thông tin gói thầu. *Gói thầu gồm có các thông tin: tên gói thầu, Scope Of Work, thông tin thiết kế, yêu cầu kỹ thuật, ghi chú khác từ BOD, timeline | Nhận hồ sơ thông tin gói thầu",
+      "chooseWhen": [
+        "Use when the document belongs to a specific tender package.",
+        "Có, gói thầu theo nhóm công tác, mỗi công tác có thể có nhiều gói thầu"
+      ],
+      "aliases": [
+        "thông tin gói thầu",
+        "package information"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_PKG_{GoiThau}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:PKG",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      },
+      "exampleCodes": [
+        "M01_PKG_MEP01",
+        "M01_PKG_ELV01"
+      ],
+      "filenameExamples": [
+        "M01_PKG_MEP01",
+        "M01_PKG_ELV01"
+      ],
+      "ambiguities": [],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "TEN",
+      "sourceRows": [
+        6
+      ],
+      "stage": "1.Trước đầu thầu (Pre-tender)",
+      "businessName": "Danh sách nhà thầu/nhà cung cấp",
+      "businessIntent": "Danh sách nhà thầu/nhà cung cấp | File danh sách nhà thầu/nhà cung cấp (Vendor list) *File này đi theo gói thầu | Lập danh sách mời thầu để trình phê duyệt",
+      "chooseWhen": [
+        "Use when the document belongs to a specific tender package.",
+        "Có, theo gói thầu"
+      ],
+      "aliases": [
+        "vendor list",
+        "tenderer list",
+        "danh sách nhà thầu"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_TEN_{GoiThau}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:TEN",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      },
+      "exampleCodes": [
+        "M01_TEN_MEP01"
+      ],
+      "filenameExamples": [
+        "M01_TEN_MEP01_Vendor list_"
+      ],
+      "ambiguities": [],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "PTE",
+      "sourceRows": [
+        7
+      ],
+      "stage": "1.Trước đầu thầu (Pre-tender)",
+      "businessName": "Dự toán gói thầu",
+      "businessIntent": "Dự toán gói thầu | PTE | Dự toán gói thầu (PTE ) (Optional)",
+      "chooseWhen": [
+        "Use when the document belongs to a specific tender package.",
+        "Có, theo gói thầu"
+      ],
+      "aliases": [
+        "pte",
+        "dự toán gói thầu"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_PTE_{GoiThau}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:PTE",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      },
+      "exampleCodes": [
+        "M01_PTE_MEP01"
+      ],
+      "filenameExamples": [
+        "M01_PTE_MEP01_Dự toán_"
+      ],
+      "ambiguities": [],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "INV",
+      "sourceRows": [
+        9
+      ],
+      "stage": "2.Đấu thầu",
+      "businessName": "Thư mời thầu có phát hành file",
+      "businessIntent": "Thư mời thầu có phát hành file | Thư mời thầu (gửi mail có đính kèm file) | Gửi thư mời thầu",
+      "chooseWhen": [
+        "Use when the document belongs to a specific tender package.",
+        "Có, để AI tổng hợp vào công việc liên quan phục vụ cho báo cáo công việc. Gửi 1 thư cho nhiều nhà thầu hay mõi nhà thầu 1 thư?"
+      ],
+      "aliases": [
+        "invitation",
+        "thư mời thầu"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_INV_{GoiThau}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:INV",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      },
+      "exampleCodes": [
+        "M01_INV_MEP01"
+      ],
+      "filenameExamples": [
+        "M01_INV_MEP01_Thư mời thầu_Rev01"
+      ],
+      "ambiguities": [
+        "Nguồn còn câu hỏi mở: gửi chung hay riêng từng nhà thầu; mã ví dụ không có NhaThau."
+      ],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "TDO",
+      "sourceRows": [
+        10
+      ],
+      "stage": "2.Đấu thầu",
+      "businessName": "Hồ sơ mời thầu",
+      "businessIntent": "Hồ sơ mời thầu | Các tài liệu hồ sơ mời thầu: - BOQ (do tư vấn QS lập hoặc CNC tự lập các gói nhỏ ) - Các điều khoản hợp đồng và các thành phần hồ sơ liên quan khác | Lập hồ sơ mời thầu",
+      "chooseWhen": [
+        "Use when the document belongs to a specific tender package."
+      ],
+      "aliases": [
+        "tender document",
+        "hồ sơ mời thầu",
+        "hsmt",
+        "itb"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_TDO_{GoiThau}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:TDO",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      },
+      "exampleCodes": [
+        "M01_TDO_MEP01"
+      ],
+      "filenameExamples": [
+        "M01_TDO_MEP01_BOQ",
+        "M01_TDO_MEP01_Điều khoản hợp đồng_Rev01"
+      ],
+      "ambiguities": [
+        "BOQ/điều khoản hợp đồng là mô tả file con trong bộ TDO, không phải rule mã độc lập theo dòng này."
+      ],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "BID",
+      "sourceRows": [
+        12
+      ],
+      "stage": "2.Đấu thầu",
+      "businessName": "Hồ sơ dự thầu",
+      "businessIntent": "Hồ sơ dự thầu | Nhận lại hồ sơ dự thầu từ các nhà thầu",
+      "chooseWhen": [
+        "Use when the document belongs to a specific tender package.",
+        "Mỗi nhà thầu là 1 bộ hồ sơ riêng"
+      ],
+      "aliases": [
+        "bid submission",
+        "hồ sơ dự thầu",
+        "hsdt"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau",
+        "NhaThau"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_BID_{GoiThau}_{NhaThau}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:BID",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      },
+      "exampleCodes": [
+        "M01_TDO_MEP01_CTC"
+      ],
+      "filenameExamples": [
+        "M01_BID_MEP01_CTC_Báo cáo tài chính_Rev01",
+        "M01_BID_MEP01_CTC_Bảng tiến độ thanh toán_Rev01",
+        "M01_BID_MEP01_CTC_Biện pháp thi công_Rev01"
+      ],
+      "ambiguities": [
+        "HoSo row 12 has an example code with TDO but filename examples use BID; prefer BID for bid submissions."
+      ],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau",
+          "NhaThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "TOR",
+      "sourceRows": [
+        13
+      ],
+      "stage": "2.Đấu thầu",
+      "businessName": "Biên bản mở thầu",
+      "businessIntent": "Biên bản mở thầu | Mở thầu",
+      "chooseWhen": [
+        "Use when the document belongs to a specific tender package.",
+        "Có, chỉ 1 biên bản mở thàu chung cho nhiều nhà thầu? (có trường hợp 1 gói thầu đấu thầu từng phần nên mở từng lần ko? Hoặc đấu lần 1 bị fail đấu lại?"
+      ],
+      "aliases": [
+        "tender opening record",
+        "biên bản mở thầu"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_TOR_{GoiThau}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:TOR",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      },
+      "exampleCodes": [
+        "M01_TOR_MEP01"
+      ],
+      "filenameExamples": [
+        "M01_MEP01_TOR_Biên bản mở thầu_Rev01",
+        "M01_MEP01_TOR_Biên bản mở thầu_Rev02"
+      ],
+      "ambiguities": [
+        "Cột K là mã hồ sơ chuẩn; ví dụ tên file có thứ tự token khác và không được dùng để đổi code pattern."
+      ],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "TCQ",
+      "sourceRows": [
+        14
+      ],
+      "stage": "2.Đấu thầu",
+      "businessName": "Hồ sơ làm rõ hồ sơ dự thầu",
+      "businessIntent": "Hồ sơ làm rõ hồ sơ dự thầu | Câu hỏi làm rõ hồ sơ thầu Biên bản phỏng vấn thầu và các thành phần hồ sơ liên quan khác | Trao đổi thông tin/phỏng vấn làm rõ hồ sơ",
+      "chooseWhen": [
+        "Use when the document belongs to a specific tender package.",
+        "Mỗi bộ hồ sơ dự thầu cần làm rõ thì sẽ trao đổi nên bộ hồ sơ làm rõ sẽ phải đi theo từng nhà thầu riêng biệt."
+      ],
+      "aliases": [
+        "clarification",
+        "làm rõ hồ sơ",
+        "phỏng vấn thầu"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau",
+        "NhaThau"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_TCQ_{GoiThau}_{NhaThau}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:TCQ",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      },
+      "exampleCodes": [
+        "M01_TCQ_MEP01_CTC",
+        "M01_TCQ_MEP01_HB"
+      ],
+      "filenameExamples": [],
+      "ambiguities": [],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau",
+          "NhaThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "TEV",
+      "sourceRows": [
+        15
+      ],
+      "stage": "2.Đấu thầu",
+      "businessName": "Báo cáo lựa chọn nhà thầu",
+      "businessIntent": "Báo cáo lựa chọn nhà thầu",
+      "chooseWhen": [
+        "Use when the document belongs to a specific tender package.",
+        "Có,"
+      ],
+      "aliases": [
+        "tender evaluation",
+        "báo cáo lựa chọn nhà thầu"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_TEV_{GoiThau}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:TEV",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "null"
+      },
+      "exampleCodes": [
+        "M01_TEV_MEP01"
+      ],
+      "filenameExamples": [],
+      "ambiguities": [],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "LOI",
+      "sourceRows": [
+        16
+      ],
+      "stage": "2.Đấu thầu",
+      "businessName": "Thư thông báo ý định trao thầu",
+      "businessIntent": "Thư thông báo ý định trao thầu | Thư thông báo ý định trao thầu (LOI)/Thông báo trúng thầu (LOA) | Trao thầu (thông báo trúng thầu)",
+      "chooseWhen": [
+        "Use when the document belongs to a specific tender package.",
+        "Có, Thư thông báo không trúng thầu: không lưu trữ/không quản lý mã?"
+      ],
+      "aliases": [
+        "loi",
+        "letter of intent"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau",
+        "NhaThau"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_LOI_{GoiThau}_{NhaThau}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:LOI",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      },
+      "exampleCodes": [
+        "M01_LOI_MEP01_CTC",
+        "M01_LOA_MEP01_CTC"
+      ],
+      "filenameExamples": [],
+      "ambiguities": [],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau",
+          "NhaThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "LOA",
+      "sourceRows": [
+        16
+      ],
+      "stage": "2.Đấu thầu",
+      "businessName": "Thông báo trúng thầu",
+      "businessIntent": "Thông báo trúng thầu | Thư thông báo ý định trao thầu (LOI)/Thông báo trúng thầu (LOA) | Trao thầu (thông báo trúng thầu)",
+      "chooseWhen": [
+        "Use when the document belongs to a specific tender package.",
+        "Có, Thư thông báo không trúng thầu: không lưu trữ/không quản lý mã?"
+      ],
+      "aliases": [
+        "loa",
+        "letter of award",
+        "thông báo trúng thầu"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "GoiThau",
+        "NhaThau"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_LOA_{GoiThau}_{NhaThau}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:LOA",
+        "GoiThau": "derive_from_code",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      },
+      "exampleCodes": [
+        "M01_LOI_MEP01_CTC",
+        "M01_LOA_MEP01_CTC"
+      ],
+      "filenameExamples": [],
+      "ambiguities": [],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau",
+          "NhaThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "CTR",
+      "sourceRows": [
+        18
+      ],
+      "stage": "3.Hợp đồng",
+      "businessName": "Hợp đồng final",
+      "businessIntent": "Hợp đồng final | Hợp đồng (bản final) | Ký hợp đồng",
+      "chooseWhen": [
+        "Use when the document belongs to a specific contractor or supplier.",
+        "Có, 1 gói chia nhiều hợp đồng? 1 nhà thầu có thể có nhiều hợp đồng của cùng 1 gói? 1 hợp đồng gom nhiều gói? Mã hợp đồng này có thể độc lập hoặc trùng với số hợp đồng pháp lý nếu phù hợp quy định, và TTG luôn là bên phát hành."
+      ],
+      "aliases": [
+        "contract",
+        "hợp đồng"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "PhapNhan",
+        "NhaThau",
+        "ContractSequence"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_{PhapNhan}_{NhaThau}_CTR_{ContractSequence}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:CTR",
+        "GoiThau": "null",
+        "PhapNhan": "derive_from_code",
+        "NhaThau": "derive_from_code"
+      },
+      "exampleCodes": [
+        "R01_TTDN_CTC_CTR_01",
+        "R01_BDM_CTC_CTR_01"
+      ],
+      "filenameExamples": [],
+      "ambiguities": [
+        "GoiThau không có trong mã hợp đồng."
+      ],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "PhapNhan",
+          "NhaThau"
+        ],
+        "sequenceFields": [
+          "ContractSequence"
+        ],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "IPC",
+      "sourceRows": [
+        19
+      ],
+      "stage": "4.Sau hợp đồng",
+      "businessName": "Hồ sơ thanh toán/tạm ứng theo đợt",
+      "businessIntent": "Hồ sơ thanh toán/tạm ứng theo đợt | Hồ sơ thanh toán IPC/tạm ứng. *Tùy vào điều kiện thanh toán của hợp đồng mà thành phần hồ sơ bao gồm: + Đề nghị thanh toán + Hóa đơn + Hồ sơ chất lượng/khối lượng/giá trị + Đề nghị thanh toán nội bộ | Theo dõi thanh toán (tạm ứng và thanh toán đợt)",
+      "chooseWhen": [
+        "Use when the document is a child record under an identified contract. Prefer ParentContractCode; otherwise derive the parent from DuAn, PhapNhan, NhaThau and ContractSequence.",
+        "Có, Theo dõi được bộ hồ sơ thanh toán từng đợt của từng hợp đồng"
+      ],
+      "aliases": [
+        "ipc",
+        "payment",
+        "thanh toán"
+      ],
+      "requiredForCode": [
+        "ParentContractCode",
+        "DocumentSequence"
+      ],
+      "mode": "parent_contract",
+      "codePattern": "{ParentContractCode}_IPC_{DocumentSequence}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_parent",
+        "LoaiTaiLieu": "constant:IPC",
+        "GoiThau": "null",
+        "PhapNhan": "derive_from_parent",
+        "NhaThau": "derive_from_parent"
+      },
+      "exampleCodes": [
+        "M01_TTDN_CTC_CTR_01_IPC_01"
+      ],
+      "filenameExamples": [],
+      "ambiguities": [],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau",
+          "PhapNhan",
+          "NhaThau"
+        ],
+        "sequenceFields": [
+          "DocumentSequence"
+        ],
+        "parentContractChild": true
+      }
+    },
+    {
+      "documentTypeCode": "TEB",
+      "sourceRows": [
+        20
+      ],
+      "stage": "4.Sau hợp đồng",
+      "businessName": "Bảo lãnh dự thầu",
+      "businessIntent": "Bảo lãnh dự thầu | Chứng thư bảo lãnh. *Các loại chứng thư bảo lãnh thường có gồm:bảo lãnh tạm ứng, thanh toán, thực hiện hợp đầu, bảo hành. | Theo dõi chứng thư bảo lãnh (nếu có)",
+      "chooseWhen": [
+        "Use when the document belongs to a specific contractor or supplier.",
+        "Phân loại chứng thư, cảnh báo ngày hết hạn"
+      ],
+      "aliases": [
+        "bid bond",
+        "bảo lãnh dự thầu"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "NhaThau",
+        "ExpiryDateYYMMDD"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_TEB_{NhaThau}_{ExpiryDateYYMMDD}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:TEB",
+        "GoiThau": "null",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      },
+      "exampleCodes": [
+        "M01_TEB_CTC_260728"
+      ],
+      "filenameExamples": [],
+      "ambiguities": [
+        "Không có GoiThau hoặc PhapNhan trong mã."
+      ],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "NhaThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "VO",
+      "sourceRows": [
+        21
+      ],
+      "stage": "4.Sau hợp đồng",
+      "businessName": "Phát sinh/Variation Order",
+      "businessIntent": "Phát sinh/Variation Order | VO | Theo dõi VO/Phụ lục nếu có",
+      "chooseWhen": [
+        "Use when the document is a child record under an identified contract. Prefer ParentContractCode; otherwise derive the parent from DuAn, PhapNhan, NhaThau and ContractSequence.",
+        "Có,"
+      ],
+      "aliases": [
+        "variation order",
+        "phát sinh"
+      ],
+      "requiredForCode": [
+        "ParentContractCode",
+        "DocumentSequence"
+      ],
+      "mode": "parent_contract",
+      "codePattern": "{ParentContractCode}_VO_{DocumentSequence}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_parent",
+        "LoaiTaiLieu": "constant:VO",
+        "GoiThau": "optional_input",
+        "PhapNhan": "derive_from_parent",
+        "NhaThau": "derive_from_parent"
+      },
+      "exampleCodes": [
+        "M01_TTDN_CTC_CTR_01_VO_01"
+      ],
+      "filenameExamples": [],
+      "ambiguities": [],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau",
+          "PhapNhan",
+          "NhaThau"
+        ],
+        "sequenceFields": [
+          "DocumentSequence"
+        ],
+        "parentContractChild": true
+      }
+    },
+    {
+      "documentTypeCode": "PL",
+      "sourceRows": [
+        22
+      ],
+      "stage": "4.Sau hợp đồng",
+      "businessName": "Phụ lục hợp đồng",
+      "businessIntent": "Phụ lục hợp đồng | PL",
+      "chooseWhen": [
+        "Use when the document is a child record under an identified contract. Prefer ParentContractCode; otherwise derive the parent from DuAn, PhapNhan, NhaThau and ContractSequence.",
+        "Có,"
+      ],
+      "aliases": [],
+      "requiredForCode": [
+        "ParentContractCode",
+        "DocumentSequence"
+      ],
+      "mode": "parent_contract",
+      "codePattern": "{ParentContractCode}_PL_{DocumentSequence}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_parent",
+        "LoaiTaiLieu": "constant:PL",
+        "GoiThau": "optional_input",
+        "PhapNhan": "derive_from_parent",
+        "NhaThau": "derive_from_parent"
+      },
+      "exampleCodes": [
+        "M01_TTDN_CTC_CTR_01_PL_01"
+      ],
+      "filenameExamples": [],
+      "ambiguities": [],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau",
+          "PhapNhan",
+          "NhaThau"
+        ],
+        "sequenceFields": [
+          "DocumentSequence"
+        ],
+        "parentContractChild": true
+      }
+    },
+    {
+      "documentTypeCode": "FAC",
+      "sourceRows": [
+        23
+      ],
+      "stage": "4.Sau hợp đồng",
+      "businessName": "Hồ sơ quyết toán hợp đồng",
+      "businessIntent": "Hồ sơ quyết toán hợp đồng | Hồ sơ thanh toán. Thành phần hồ sơ (tùy điều kiện hợp đồng): + Đề nghị thanh toán + Hóa đơn + Hồ sơ chất lượng/khối lượng/giá trị + Đề nghị thanh toán nội bộ + Ý kiến vận hành (nếu có) + Biên bản nghiệm thu hoàn thành đưa vào sử dụng (TOC) + Biên bản quyết toán và thanh lý hợp đồng | Quyết toán",
+      "chooseWhen": [
+        "Use when the document is a child record under an identified contract. Prefer ParentContractCode; otherwise derive the parent from DuAn, PhapNhan, NhaThau and ContractSequence.",
+        "Có"
+      ],
+      "aliases": [
+        "final account",
+        "quyết toán"
+      ],
+      "requiredForCode": [
+        "ParentContractCode"
+      ],
+      "mode": "parent_contract",
+      "codePattern": "{ParentContractCode}_FAC",
+      "metadataPolicy": {
+        "DuAn": "derive_from_parent",
+        "LoaiTaiLieu": "constant:FAC",
+        "GoiThau": "optional_input",
+        "PhapNhan": "derive_from_parent",
+        "NhaThau": "derive_from_parent"
+      },
+      "exampleCodes": [
+        "M01_TTDN_CTC_CTR_01_FAC"
+      ],
+      "filenameExamples": [],
+      "ambiguities": [],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "GoiThau",
+          "PhapNhan",
+          "NhaThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": true
+      }
+    },
+    {
+      "documentTypeCode": "QUO",
+      "sourceRows": [
+        25
+      ],
+      "stage": "Cung ứng (Mua sắm vật tư thiết bị giao cho nhà thầu thi công lắp đặt)",
+      "businessName": "Báo giá nhà cung cấp",
+      "businessIntent": "Báo giá nhà cung cấp | Báo giá của nhà cung cấp kèm thông tin kỹ thuật | Tìm kiếm nhà cung nhận báo giá",
+      "chooseWhen": [
+        "Use when the document belongs to a specific contractor or supplier."
+      ],
+      "aliases": [
+        "quotation",
+        "báo giá"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "NhaThau"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_QUO_{NhaThau}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:QUO",
+        "GoiThau": "null",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      },
+      "exampleCodes": [
+        "M01_QUO_CTC"
+      ],
+      "filenameExamples": [],
+      "ambiguities": [],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "NhaThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    },
+    {
+      "documentTypeCode": "COR",
+      "sourceRows": [
+        26
+      ],
+      "stage": "Cung ứng (Mua sắm vật tư thiết bị giao cho nhà thầu thi công lắp đặt)",
+      "businessName": "So sánh báo giá",
+      "businessIntent": "So sánh báo giá | Trình so sánh giá kèm mẫu mã cho BOD để lựa chọn NCC",
+      "chooseWhen": [
+        "Use when the document belongs to a specific contractor or supplier."
+      ],
+      "aliases": [
+        "comparison",
+        "so sánh báo giá"
+      ],
+      "requiredForCode": [
+        "DuAn",
+        "NhaThau"
+      ],
+      "mode": "direct",
+      "codePattern": "{DuAn}_COR_{NhaThau}",
+      "metadataPolicy": {
+        "DuAn": "derive_from_code",
+        "LoaiTaiLieu": "constant:COR",
+        "GoiThau": "null",
+        "PhapNhan": "null",
+        "NhaThau": "derive_from_code"
+      },
+      "exampleCodes": [
+        "M01_COR_CTC"
+      ],
+      "filenameExamples": [],
+      "ambiguities": [],
+      "proposalHints": {
+        "masterBackedFields": [
+          "DuAn",
+          "NhaThau"
+        ],
+        "sequenceFields": [],
+        "parentContractChild": false
+      }
+    }
+  ],
+  "nonExecutableRows": [
+    {
+      "row": 8,
+      "stage": "2.Đấu thầu",
+      "work": "Gửi thư mời quan tâm",
+      "dataTypes": "Thư mời quan tâm *Hiện nay chỉ gửi nội dung qua mail, không đính kèm file, không lưu file",
+      "reason": "no code required or context row",
+      "rawExamples": []
+    },
+    {
+      "row": 11,
+      "stage": "2.Đấu thầu",
+      "work": "Phát hành hồ sơ thầu (bao gồm phụ lục)",
+      "dataTypes": "Các hồ sơ mời thầu ở trên",
+      "reason": "no code required or context row",
+      "rawExamples": []
+    },
+    {
+      "row": 17,
+      "stage": "3.Hợp đồng",
+      "work": "Soạn hợp đồng và thương thảo",
+      "dataTypes": "Hợp đồng (hợp đồng thi công/tư vấn/mua hàng)",
+      "reason": "no code required or context row",
+      "rawExamples": []
+    },
+    {
+      "row": 24,
+      "stage": "Cung ứng (Mua sắm vật tư thiết bị giao cho nhà thầu thi công lắp đặt)",
+      "work": "Nhận yêu cầu mua hàng",
+      "dataTypes": null,
+      "reason": "no code required or context row",
+      "rawExamples": []
+    },
+    {
+      "row": 27,
+      "stage": "Cung ứng (Mua sắm vật tư thiết bị giao cho nhà thầu thi công lắp đặt)",
+      "work": "Lập hợp đông tương tự phần đấu thầu",
+      "dataTypes": null,
+      "reason": "no executable document-code rule in current matrix",
+      "rawExamples": [
+        "Tương tự cách đặt hợp đồng ở trên",
+        "M01_TTDN_CTC_CTR_01"
+      ]
+    }
+  ]
+}

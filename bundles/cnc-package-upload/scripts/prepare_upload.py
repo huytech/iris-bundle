@@ -275,6 +275,60 @@ def parse_values(values: list[str]) -> dict:
     return result
 
 
+def load_json_argument(value: str) -> dict:
+    candidate = Path(value)
+    if candidate.is_file():
+        return local_file_pipeline._read(candidate)
+    try:
+        loaded = json.loads(value)
+    except json.JSONDecodeError as error:
+        raise RuntimeError("--llm-proposal must be JSON or a path to a JSON file") from error
+    if not isinstance(loaded, dict):
+        raise RuntimeError("--llm-proposal must be a JSON object")
+    return loaded
+
+
+def load_llm_proposal(args: argparse.Namespace) -> dict | None:
+    raw = getattr(args, "llm_proposal", None)
+    if not raw:
+        return None
+    proposal = load_json_argument(raw)
+    if not isinstance(proposal.get("values", {}), dict):
+        raise RuntimeError("LLM proposal values must be an object")
+    return proposal
+
+
+def proposal_document_type(proposal: dict, matrix: dict, aliases: dict) -> str:
+    raw = proposal.get("documentTypeCode") or proposal.get("documentType") or proposal.get("ruleId")
+    if raw is None or str(raw).strip() == "":
+        raise RuntimeError("LLM proposal is missing documentTypeCode")
+    resolved = document_code_engine.resolve_document_type(str(raw), matrix, aliases)
+    code = resolved or matrix.get("documentTypeAliases", {}).get(str(raw).strip().upper(), str(raw).strip().upper())
+    if code not in matrix.get("rules", {}):
+        raise RuntimeError(f"LLM proposal document type is unsupported: {raw}")
+    return code
+
+
+def proposal_values(proposal: dict) -> dict:
+    values = {}
+    for field, value in proposal.get("values", {}).items():
+        if value in (None, ""):
+            continue
+        canonical = canonical_business_field(field)
+        values[canonical] = str(value).strip()
+    return values
+
+
+def proposal_missing_question(proposal: dict, values: dict) -> str:
+    question = proposal.get("question")
+    if isinstance(question, str) and question.strip():
+        return question.strip()
+    missing = [str(field) for field in proposal.get("missingFields", []) if str(field).strip()]
+    if missing:
+        return missing_business_question(missing, values)
+    return "Cần bổ sung thông tin nghiệp vụ còn thiếu để tạo mã."
+
+
 def search_text(value: str) -> str:
     text = unicodedata.normalize("NFD", str(value).casefold()).replace("đ", "d")
     return " ".join("".join(ch for ch in text if unicodedata.category(ch) != "Mn").split())
@@ -471,15 +525,45 @@ def plan_batch(args: argparse.Namespace) -> dict:
     base = Path(__file__).parents[1]
     matrix = document_code_engine.load_matrix(base / "config/document-code-matrix.json")
     aliases = document_code_engine.load_matrix(base / "config/classification-aliases.json")
-    document_type = document_code_engine.resolve_document_type(args.document_type, matrix, aliases)
-    if document_type is None:
-        raise RuntimeError(f"Document type is ambiguous or unsupported: {args.document_type}")
+    proposal = load_llm_proposal(args)
+    if proposal is None:
+        document_type = document_code_engine.resolve_document_type(args.document_type, matrix, aliases)
+        if document_type is None:
+            raise RuntimeError(f"Document type is ambiguous or unsupported: {args.document_type}")
+    else:
+        document_type = proposal_document_type(proposal, matrix, aliases)
+        if args.document_type and args.document_type != "auto":
+            requested_type = document_code_engine.resolve_document_type(args.document_type, matrix, aliases)
+            if requested_type is not None and requested_type != document_type:
+                raise RuntimeError("LLM proposal document type conflicts with --document-type")
+        confidence = proposal.get("confidence")
+        min_confidence = float(getattr(args, "llm_min_confidence", 0.65))
+        if isinstance(confidence, (int, float)) and confidence < min_confidence:
+            return {
+                "status": "needs_user_input",
+                "documentTypeCode": document_type,
+                "fileCount": len(scan.get("files", [])),
+                "question": proposal_missing_question(proposal, proposal_values(proposal)),
+                "llmProposal": proposal,
+            }
     rule = matrix["rules"][document_type]
     scan_filenames = " ".join(item.get("relativePath", "") for item in scan.get("files", []))
     request_context = " ".join(filter(None, (args.document_type, getattr(args, "request_context", ""), scan_filenames)))
     previous_values = context.get("resolvedValues")
     supplied = previous_values.copy() if isinstance(previous_values, dict) else {}
+    if proposal is not None:
+        supplied.update(proposal_values(proposal))
     supplied.update(parse_values(args.value))
+    if proposal is not None and proposal.get("missingFields"):
+        return {
+            "status": "needs_user_input",
+            "documentTypeCode": document_type,
+            "fileCount": len(scan.get("files", [])),
+            "missingFields": proposal.get("missingFields", []),
+            "question": proposal_missing_question(proposal, supplied),
+            "resolvedValues": supplied,
+            "llmProposal": proposal,
+        }
     supplied_values, destination_ignored = separate_destination_package(supplied, context["package"]["packageFolderName"])
     supplied_values = infer_master_values_from_request(supplied_values, request_context, snapshot)
     supplied_values, rule_ignored = values_for_rule(supplied_values, rule)
@@ -553,7 +637,22 @@ def plan_batch(args: argparse.Namespace) -> dict:
             "question": missing_business_question(missing, values),
             "resolvedValues": values,
             "ignoredFields": ignored_fields,
-        }
+            }
+    if proposal is not None and proposal.get("proposedDocumentCode"):
+        proposed_code = str(proposal["proposedDocumentCode"]).strip().upper()
+        generated_codes = {str(result.get("DocumentCode", "")).strip().upper() for result in codes.get("results", {}).values()}
+        if generated_codes != {proposed_code}:
+            return {
+                "status": "invalid",
+                "reason": "LLM_PROPOSAL_CODE_MISMATCH",
+                "documentTypeCode": document_type,
+                "fileCount": len(items),
+                "errors": [f"LLM proposed {proposed_code}, deterministic renderer produced {', '.join(sorted(generated_codes))}"],
+                "message": "Mã LLM đề xuất không khớp mã được render từ rule và master data.",
+                "resolvedValues": values,
+                "ignoredFields": ignored_fields,
+                "llmProposal": proposal,
+            }
     masters = master_sets(snapshot)
     for relative_path, result in codes.get("results", {}).items():
         result["fileNameDecision"] = file_name_decision(relative_path, result, matrix, masters)
@@ -621,9 +720,11 @@ def main() -> int:
     inspect_parser.add_argument("--package-template", default=str(base / "config/package-folder-template.json"))
     plan_parser = commands.add_parser("plan-batch")
     plan_parser.add_argument("--context", required=True)
-    plan_parser.add_argument("--document-type", required=True)
+    plan_parser.add_argument("--document-type", default="auto")
     plan_parser.add_argument("--request-context", default="")
     plan_parser.add_argument("--value", action="append", default=[])
+    plan_parser.add_argument("--llm-proposal")
+    plan_parser.add_argument("--llm-min-confidence", type=float, default=0.65)
     combined_parser = commands.add_parser("prepare-and-plan")
     combined_parser.add_argument("--source", required=True)
     combined_parser.add_argument("--package", required=True)
@@ -634,9 +735,11 @@ def main() -> int:
     combined_parser.add_argument("--master-config", default=str(base / "config/master-data.json"))
     combined_parser.add_argument("--package-config", default=str(base / "config/package-sharepoint.json"))
     combined_parser.add_argument("--package-template", default=str(base / "config/package-folder-template.json"))
-    combined_parser.add_argument("--document-type", required=True)
+    combined_parser.add_argument("--document-type", default="auto")
     combined_parser.add_argument("--request-context", default="")
     combined_parser.add_argument("--value", action="append", default=[])
+    combined_parser.add_argument("--llm-proposal")
+    combined_parser.add_argument("--llm-min-confidence", type=float, default=0.65)
     args = parser.parse_args()
     try:
         if args.command == "inspect":
@@ -656,6 +759,8 @@ def main() -> int:
                 document_type=args.document_type,
                 request_context=args.request_context,
                 value=args.value,
+                llm_proposal=args.llm_proposal,
+                llm_min_confidence=args.llm_min_confidence,
             )
             output = plan_batch(plan_args)
             output["contextPath"] = context_path

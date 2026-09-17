@@ -5,7 +5,7 @@ description: Phân loại, tạo mã, kiểm tra hoặc tạo package sau xác n
 
 # CNC Package Upload
 
-Agent hiểu yêu cầu và nội dung hồ sơ, chọn documentTypeCode, xác định input mã và trình preview. Script thực hiện scan/hash file, snapshot/lookup master data, render mã, kiểm tra package, tạo package đã duyệt, stage, upload và verify.
+Agent hiểu yêu cầu và nội dung hồ sơ, đọc rule nghiệp vụ `HoSo` đã export, chọn documentTypeCode, xác định input mã và trình preview. Script thực hiện scan/hash file, snapshot/lookup master data, validate đề xuất, render mã, kiểm tra package, tạo package đã duyệt, stage, upload và verify.
 
 Không đọc source Python trong quy trình thông thường. Chỉ đọc source khi helper lỗi hoặc user yêu cầu debug.
 
@@ -23,7 +23,9 @@ Nếu `prepare-and-plan` trả `ready`, `fileCount > 0`, `collisionCount = 0`, k
 
 ## Chỉ tạo mã
 
-Khi user chỉ yêu cầu tạo mã và không yêu cầu upload/package, không chạy `prepare_upload.py`, không hỏi đường dẫn file, không kiểm tra package và không glob/grep matrix. Truyền trực tiếp tên nghiệp vụ hoặc code vào `document_code_engine.py --describe-type`; engine tự resolve business name/alias. Chỉ hỏi các trường trong `requiredForCode` của đúng rule còn thiếu bằng chứng; không biến metadata, filename, đơn vị phát hành, sequence hoặc revision thành yêu cầu chung cho mọi loại tài liệu.
+Khi user chỉ yêu cầu tạo mã và không yêu cầu upload/package, không hỏi đường dẫn file và không kiểm tra package. Đọc `config/hoso-rules.semantic.json` cùng master data liên quan rồi dùng ngữ nghĩa trong hội thoại để lập proposal JSON như luồng preview. Chỉ mở `config/hoso-rules.json` khi cần trace về sheet gốc hoặc xử lý mâu thuẫn chưa rõ. Nếu proposal thiếu dữ liệu hoặc confidence thấp, hỏi đúng trường nghiệp vụ còn thiếu. Nếu proposal đủ dữ liệu, gọi `document_code_engine.py` bằng `documentTypeCode` và `values` trong proposal để render/validate mã cuối; không để mã LLM tự sinh thay thế renderer.
+
+Chỉ hỏi các trường thật sự còn thiếu theo proposal và rule được chọn; không biến metadata, filename, đơn vị phát hành, sequence hoặc revision thành yêu cầu chung cho mọi loại tài liệu.
 
 Nếu tên nghiệp vụ đủ rõ và mọi `requiredForCode` đã có trong yêu cầu, gọi engine ngay. Nếu chưa resolve được duy nhất một loại tài liệu, hỏi đúng điểm phân loại còn mơ hồ trước; không hỏi một biểu mẫu trường cố định khi chưa biết rule.
 
@@ -31,15 +33,35 @@ Nếu script Graph trả token expired, gọi `iris_m365_refresh` rồi retry đ
 
 ## Chuẩn bị và lập preview
 
-Với yêu cầu upload đã có đủ dữ kiện nghiệp vụ, chạy đúng một command. Command này scan nguồn, lấy master data có cache kiểm soát, kiểm tra package, dựng mã, validate master, lập plan và kiểm tra collision:
+Với yêu cầu upload, trước tiên đọc `config/hoso-rules.semantic.json`. Đây là bản semantic đã làm sạch từ sheet `HoSo`: một rule theo `documentTypeCode`, có business intent, khi nào chọn, alias, required fields, code pattern, ví dụ sạch và ambiguity notes. Chỉ mở `config/hoso-rules.json` khi cần đối chiếu nguồn sheet gốc. Dùng JSON semantic này cùng user request, tên file/nội dung file đã đọc và master data SharePoint để tự lập một proposal JSON có cấu trúc:
+
+```json
+{
+  "selectedRuleRow": 12,
+  "documentTypeCode": "BID",
+  "confidence": 0.86,
+  "values": {
+    "DuAn": "M01",
+    "GoiThau": "MEP01",
+    "NhaThau": "CTC"
+  },
+  "proposedDocumentCode": "M01_BID_MEP01_CTC",
+  "missingFields": [],
+  "evidence": ["filename or content evidence", "HoSo row evidence"]
+}
+```
+
+Nếu chưa đủ tự tin hoặc còn thiếu dữ liệu, đặt `missingFields` và `question` trong proposal; không tự bịa mã master. Proposal là cách agent phân loại bằng ngữ nghĩa từ rule `HoSo`; script vẫn là bước kiểm tra cuối để validate master, normalize sequence và render mã.
+
+Với proposal đã có, chạy đúng một command. Command này scan nguồn, lấy master data có cache kiểm soát, kiểm tra package, validate proposal, dựng mã, lập plan và kiểm tra collision:
 
 ```bash
-python scripts/prepare_upload.py prepare-and-plan --source "<sourceFolderPath>" --package "<packageFolderName>" --workspace "<agentWorkingDirectory>" --output-dir ".cnc-work/<packageFolderName>" --document-type "<businessNameOrCode>" --request-context "<conciseOriginalRequest>" --value "<knownBusinessField>=<value>"
+python scripts/prepare_upload.py prepare-and-plan --source "<sourceFolderPath>" --package "<packageFolderName>" --workspace "<agentWorkingDirectory>" --output-dir ".cnc-work/<packageFolderName>" --document-type auto --request-context "<conciseOriginalRequest>" --llm-proposal "<proposalJsonOrPath>"
 ```
 
 `--source` là folder hoặc file nguồn agent đã truy cập được từ tin nhắn, attachment, file picker, workspace hoặc đường dẫn user đã nêu. Nếu user đã gửi folder/file hoặc đã có path trong hội thoại thì dùng path đó, không hỏi lại "đường dẫn folder nguồn". Thiếu link SharePoint/folder đích không đồng nghĩa thiếu source; khi thiếu link đích, tự lập preview bằng package/folder đích đã suy ra hoặc hỏi đúng package/folder đích, không hỏi source. Chỉ hỏi source một lần khi trong hội thoại thật sự chưa có folder/file/path nào agent có thể scan.
 
-Agent phân loại nghiệp vụ và tổng hợp dữ liệu từ toàn bộ hội thoại hiện tại, tên file và nội dung hồ sơ đã đọc. Không hỏi lại dữ liệu đã xuất hiện. Script tự chuẩn hóa sequence, resolve code/name theo master và tự dựng mã hợp đồng cha khi đủ thành phần.
+Agent phân loại nghiệp vụ và tổng hợp dữ liệu từ toàn bộ hội thoại hiện tại, `hoso-rules.semantic.json`, tên file và nội dung hồ sơ đã đọc. Không hỏi lại dữ liệu đã xuất hiện. Script tự chuẩn hóa sequence, resolve code/name theo master và tự dựng mã hợp đồng cha khi đủ thành phần. `--value "<knownBusinessField>=<value>"` vẫn dùng được như override thủ công khi user vừa bổ sung một field sau câu hỏi.
 
 Các tên field ưu tiên khi truyền `--value` là `DuAn`, `GoiThau`, `PhapNhan`, `NhaThau`, `ContractSequence`, `DocumentSequence`, `ParentContractCode` và `ExpiryDateYYMMDD`. `ContractSequence` và `DocumentSequence` bắt buộc là số từ 1 đến 99, có thể có số 0 ở đầu. Khi user nói `đợt 1`, `lần thứ 2` hoặc `kỳ 03`, truyền lần lượt `DocumentSequence=1`, `DocumentSequence=2` hoặc `DocumentSequence=03`; không truyền nguyên cụm nghiệp vụ vào `--value`. Giữ câu gốc trong `--request-context` để helper có thể kiểm tra và tự chuẩn hóa. Script chấp nhận các alias tiếng Anh thông dụng nhưng agent phải giữ nguyên dữ kiện rõ ràng trong lời user và không hỏi lại dữ kiện đã xác định duy nhất.
 
@@ -49,11 +71,13 @@ Ví dụ đúng: `--request-context "Hồ sơ thanh toán đợt 1" --value "Doc
 
 Folder con upload được suy ra từ mã tài liệu đã render, không hỏi user lại khi route duy nhất trong template. Với mã thường, dùng document type token trong `DocumentCode` như `PTE`, `BID`, `TDO`. Với nhóm hợp đồng, nếu mã chỉ có `CTR` thì vào folder `CTR`; nếu sau `CTR` có `IPC`, `VO`, `PL` hoặc `FAC` thì route theo token đó. Không route theo filename gốc khi `DocumentCode` đã có, vì filename có thể chứa prefix cũ. Chỉ hỏi user khi không xác định được package/folder đích hoặc có nhiều package/folder trùng khớp.
 
-Nếu `status=needs_user_input`, dùng `question` do script trả về và chỉ hỏi một lần. Sau câu trả lời, gọi `plan-batch` đúng một lần với `contextPath` đã có; không chạy lại scan. Nếu `status=invalid`, báo dữ liệu nào không hợp lệ từ `errors`, không mô tả là thiếu dữ liệu và không hỏi duyệt upload. Nếu `status=blocked`, báo collision và không hỏi duyệt upload. Nếu `status=ready`, gửi nguyên `previewMarkdown` trong chat rồi mới hỏi xác nhận bằng một câu ngắn.
+Nếu `status=needs_user_input`, dùng `question` do script trả về và chỉ hỏi một lần. Sau câu trả lời, gọi `plan-batch` đúng một lần với `contextPath` đã có; không chạy lại scan. Nếu `status=invalid`, báo dữ liệu nào không hợp lệ từ `errors`, không mô tả là thiếu dữ liệu và không hỏi duyệt upload. Nếu `status=blocked`, báo collision và không hỏi duyệt upload. Nếu `status=ready`, phản hồi hiện tại chỉ được gửi preview dạng Markdown table trong chat kèm một câu ngắn rằng sẽ hỏi duyệt sau khi user xem xong; dừng lượt tại đó và không gọi tool hỏi xác nhận trong cùng response.
 
 Không xin xác nhận nếu `fileCount=0`, `unresolvedFileCount>0`, preview thiếu file hoặc status khác `ready`. Số dòng dữ liệu trong preview phải bằng số file nguồn hợp lệ đã scan.
 
-Preview chi tiết luôn là assistant message trong chat với bảng dễ đọc như nguồn, mã tài liệu, tên file mới, destination, metadata và collision. Chỉ sau khi message preview đã hiển thị mới gọi `ask_user_question`. Popup chỉ hỏi một câu ngắn nêu package và số file; không lặp bảng, đường dẫn dài, metadata hoặc danh sách folder trong câu hỏi. Trạng thái chờ hỏi sẽ để Desktop gửi notification cho user khi cửa sổ không focus.
+Preview chi tiết luôn là assistant message trong chat, không phải popup. Message preview phải có Markdown table cơ bản để user thấy và review ngay, tối thiểu gồm: tên file nguồn, mã tài liệu, tên file sau upload, SharePoint path đích và collision. Không show path nguồn local/cache/workspace như `.cnc-auto-intake`, `%APPDATA%`, `C:\Users\...` hoặc đường dẫn file nội bộ trong message cho user; các path này chỉ dùng nội bộ để chạy helper. Có thể thêm metadata quan trọng dưới bảng bằng vài dòng ngắn, nhưng không giấu thông tin review trong popup. Không được đặt preview table và `ask_user_question` trong cùng một assistant response, vì Desktop có thể hiển thị popup trước khi user thấy message. Chỉ ở lượt sau, khi preview đã nằm trong timeline chat hoặc user nói đã xem/duyệt/tiếp tục, mới gọi `ask_user_question`. Popup chỉ hỏi một câu ngắn nêu package và số file; không lặp bảng, đường dẫn dài, metadata hoặc danh sách folder trong câu hỏi. Trạng thái chờ hỏi sẽ để Desktop gửi notification cho user khi cửa sổ không focus.
+
+Không đưa source path nội bộ vào `--request-context`, proposal `evidence`, preview message hoặc câu hỏi xác nhận. `--request-context` chỉ chứa nghiệp vụ user nói, ví dụ loại hồ sơ, dự án, nhà thầu, ngày, hợp đồng hoặc package đích. Source path chỉ truyền qua tham số `--source`.
 
 Không dùng `todo_write` cho workflow này. Không đọc lại context, snapshot, matrix hoặc output JSON khi stdout đã có status, question hoặc preview. Không gọi `--describe-type` trong luồng upload. Không gọi lại `prepare-and-plan` để dò input. Chỉ tạo subagent khi nhiều file cần đọc nội dung độc lập; không tạo subagent để scan, tra master, render mã, build plan hoặc kiểm tra package/collision.
 

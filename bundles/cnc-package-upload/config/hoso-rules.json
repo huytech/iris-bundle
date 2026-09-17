@@ -1,0 +1,639 @@
+{
+  "schemaVersion": 1,
+  "sourceWorkbook": "C:\\Users\\huy.np\\Downloads\\AI_Data CNC_V1.0.xlsx",
+  "sheet": "HoSo",
+  "exportedFromLastWriteTime": 1788486418.1555507,
+  "instructions": [
+    "Use these rows as semantic business rules, not as strict executable code.",
+    "Prefer exampleCodes and filename examples for documentTypeCode clues, but explain conflicts when examples disagree.",
+    "Return structured proposal JSON; do not invent master codes absent from active SharePoint master data."
+  ],
+  "rules": [
+    {
+      "row": 3,
+      "stage": "1.Trước đầu thầu (Pre-tender)",
+      "work": "Lập kế hoạch ngân sách cho dự án",
+      "dataTypes": "Kế hoạch ngân sách dự án (Cost plan)",
+      "codeRequirement": "Có, theo dự án, mỗi dự án 1 file kế hoạch, cost plan có thể chia riêng cho từng phạm vi/phân khu\nSẽ được review điều chỉnh hằng năm nên cần có version",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": false,
+        "PhapNhan": false,
+        "NhaThau": false
+      },
+      "exampleCodes": [
+        "M01_COP"
+      ],
+      "codeExplanation": "Kế hoạch ngân sách dự án M01",
+      "filenameParts": {
+        "documentCodeFormula": "=K3",
+        "description": "Kế hoạch ngân sách",
+        "revision": "Rev01",
+        "exampleFormula": "=N3&O3&P3&Q3&R3",
+        "exampleValue": "M01_COP_Kế hoạch ngân sách_Rev01"
+      }
+    },
+    {
+      "row": 4,
+      "stage": "1.Trước đầu thầu (Pre-tender)",
+      "work": "Nhận chiến lược đấu thầu từ PM (PD_GĐ dự án_lập kế hoạch đầu thầu và phân chia gói thầu)",
+      "dataTypes": "Kế hoạch đấu thầu và mua sắm tổng thể (MPP)\n*Kế hoạch này review điều chỉnh hằng năm",
+      "codeRequirement": "Có, theo dự án, mỗi dự án 1 file kế hoạch đấu thầu, sẽ được review điều chỉnh hằng năm nên cần có version",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": false,
+        "PhapNhan": false,
+        "NhaThau": false
+      },
+      "exampleCodes": [
+        "M01_MPP"
+      ],
+      "codeExplanation": "Kế hoạch đấu thầu và mua sắm tổng thể, dự án M01",
+      "filenameParts": {
+        "documentCodeFormula": "=K4",
+        "description": "Kế hoạch đấu thầu và mua sắm tổng thể",
+        "revision": "Rev01",
+        "exampleFormula": "=N4&O4&P4&Q4&R4",
+        "exampleValue": "M01_MPP_Kế hoạch đấu thầu và mua sắm tổng thể_Rev01"
+      }
+    },
+    {
+      "row": 5,
+      "stage": "1.Trước đầu thầu (Pre-tender)",
+      "work": "Nhận hồ sơ thông tin gói thầu",
+      "dataTypes": "Hồ sơ thông tin gói thầu.\n*Gói thầu gồm có các thông tin: tên gói thầu, Scope Of Work, thông tin thiết kế, yêu cầu kỹ thuật, ghi chú khác từ BOD, timeline",
+      "codeRequirement": "Có, gói thầu theo nhóm công tác, mỗi công tác có thể có nhiều gói thầu",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": true,
+        "PhapNhan": false,
+        "NhaThau": false
+      },
+      "exampleCodes": [
+        "M01_PKG_MEP01",
+        "M01_PKG_ELV01"
+      ],
+      "codeExplanation": "Gói thầu MEP số 01 của dự án M01\nGói thầu MEP số 01 dự án M02",
+      "filenameParts": {
+        "documentCodeFormula": "=K5",
+        "description": null,
+        "revision": null,
+        "exampleFormula": "=N5&O5&P5&Q5&R5",
+        "exampleValue": "M01_PKG_MEP01\nM01_PKG_ELV01\n__"
+      }
+    },
+    {
+      "row": 6,
+      "stage": "1.Trước đầu thầu (Pre-tender)",
+      "work": "Lập danh sách mời thầu để trình phê duyệt",
+      "dataTypes": "File danh sách nhà thầu/nhà cung cấp (Vendor list)\n*File này đi theo gói thầu",
+      "codeRequirement": "Có, theo gói thầu",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": true,
+        "PhapNhan": false,
+        "NhaThau": false
+      },
+      "exampleCodes": [
+        "M01_TEN_MEP01"
+      ],
+      "codeExplanation": "Danh sách nhà thầu cho gói MEP001 của Dự án M01",
+      "filenameParts": {
+        "documentCodeFormula": "=K6",
+        "description": "Vendor list",
+        "revision": null,
+        "exampleFormula": "=N6&O6&P6&Q6&R6",
+        "exampleValue": "M01_TEN_MEP01_Vendor list_"
+      }
+    },
+    {
+      "row": 7,
+      "stage": "1.Trước đầu thầu (Pre-tender)",
+      "work": "Dự toán gói thầu (PTE ) (Optional)",
+      "dataTypes": "PTE",
+      "codeRequirement": "Có, theo gói thầu",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": true,
+        "PhapNhan": false,
+        "NhaThau": false
+      },
+      "exampleCodes": [
+        "M01_PTE_MEP01"
+      ],
+      "codeExplanation": "Dự toán gói thầu MEP001 của dự án M01",
+      "filenameParts": {
+        "documentCodeFormula": "=K7",
+        "description": "Dự toán",
+        "revision": null,
+        "exampleFormula": "=N7&O7&P7&Q7&R7",
+        "exampleValue": "M01_PTE_MEP01_Dự toán_"
+      }
+    },
+    {
+      "row": 8,
+      "stage": "2.Đấu thầu",
+      "work": "Gửi thư mời quan tâm",
+      "dataTypes": "Thư mời quan tâm\n*Hiện nay chỉ gửi nội dung qua mail, không đính kèm file, không lưu file",
+      "codeRequirement": "Không, do không phát hành file thư",
+      "components": {
+        "DuAn": false,
+        "LoaiTaiLieu": false,
+        "GoiThau": false,
+        "PhapNhan": false,
+        "NhaThau": false
+      },
+      "exampleCodes": [],
+      "codeExplanation": null,
+      "filenameParts": {
+        "documentCodeFormula": null,
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 9,
+      "stage": "2.Đấu thầu",
+      "work": "Gửi thư mời thầu",
+      "dataTypes": "Thư mời thầu (gửi mail có đính kèm file)",
+      "codeRequirement": "Có, để AI tổng hợp vào công việc liên quan phục vụ cho báo cáo công việc.\nGửi 1 thư cho nhiều nhà thầu hay mõi nhà thầu 1 thư?",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": true,
+        "PhapNhan": false,
+        "NhaThau": false
+      },
+      "exampleCodes": [
+        "M01_INV_MEP01"
+      ],
+      "codeExplanation": "Thư mời thầu cho gói MEP01, dự án M01",
+      "filenameParts": {
+        "documentCodeFormula": "=K9",
+        "description": "Thư mời thầu",
+        "revision": "Rev01",
+        "exampleFormula": "=N9&O9&P9&Q9&R9",
+        "exampleValue": "M01_INV_MEP01_Thư mời thầu_Rev01"
+      }
+    },
+    {
+      "row": 10,
+      "stage": "2.Đấu thầu",
+      "work": "Lập hồ sơ mời thầu",
+      "dataTypes": "Các tài liệu hồ sơ mời thầu:\n- BOQ (do tư vấn QS lập hoặc CNC tự lập các gói nhỏ )\n- Các điều khoản hợp đồng\nvà các thành phần hồ sơ liên quan khác",
+      "codeRequirement": "*Nếu HSMT đã gửi nhưng có điều chỉnh cần gửi lại ở bước phát hành HSMT thì khi chỉnh sửa sẽ lập 1 hồ sơ riêng nói về phần điều chỉnh hay chỉnh trực tiếp trên hồ sơ gốc? Để cân nhắc thêm block vesion",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": true,
+        "PhapNhan": false,
+        "NhaThau": false
+      },
+      "exampleCodes": [
+        "M01_TDO_MEP01"
+      ],
+      "codeExplanation": "Hồ sơ mời thầu, gói MEP01, dự án M01",
+      "filenameParts": {
+        "documentCodeFormula": "=K10",
+        "description": "BOQ\nĐiều khoản hợp đồng\n….",
+        "revision": "Rev01",
+        "exampleFormula": "M01_TDO_MEP01_BOQ\nM01_TDO_MEP01_Điều khoản hợp đồng_Rev01",
+        "exampleValue": "M01_TDO_MEP01_BOQ\nM01_TDO_MEP01_Điều khoản hợp đồng_Rev01"
+      }
+    },
+    {
+      "row": 11,
+      "stage": "2.Đấu thầu",
+      "work": "Phát hành hồ sơ thầu (bao gồm phụ lục)",
+      "dataTypes": "Các hồ sơ mời thầu ở trên",
+      "codeRequirement": null,
+      "components": {
+        "DuAn": false,
+        "LoaiTaiLieu": false,
+        "GoiThau": false,
+        "PhapNhan": false,
+        "NhaThau": false
+      },
+      "exampleCodes": [],
+      "codeExplanation": null,
+      "filenameParts": {
+        "documentCodeFormula": null,
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 12,
+      "stage": "2.Đấu thầu",
+      "work": "Nhận lại hồ sơ dự thầu từ các nhà thầu",
+      "dataTypes": "Hồ sơ dự thầu",
+      "codeRequirement": "Mỗi nhà thầu là 1 bộ hồ sơ riêng",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": true,
+        "PhapNhan": false,
+        "NhaThau": true
+      },
+      "exampleCodes": [
+        "M01_TDO_MEP01_CTC"
+      ],
+      "codeExplanation": "Hồ sơ dự thầu, gói MEP01, của Coteccons",
+      "filenameParts": {
+        "documentCodeFormula": "=K12",
+        "description": "Báo cáo tài chính\nBảng tiến độ thanh toán\nBiện pháp thi công\n….",
+        "revision": "Rev01",
+        "exampleFormula": "M01_BID_MEP01_CTC_Báo cáo tài chính_Rev01\nM01_BID_MEP01_CTC_Bảng tiến độ thanh toán_Rev01\nM01_BID_MEP01_CTC_Biện pháp thi công_Rev01\n….",
+        "exampleValue": "M01_BID_MEP01_CTC_Báo cáo tài chính_Rev01\nM01_BID_MEP01_CTC_Bảng tiến độ thanh toán_Rev01\nM01_BID_MEP01_CTC_Biện pháp thi công_Rev01\n…."
+      }
+    },
+    {
+      "row": 13,
+      "stage": "2.Đấu thầu",
+      "work": "Mở thầu",
+      "dataTypes": "Biên bản mở thầu",
+      "codeRequirement": "Có, \nchỉ 1 biên bản mở thàu chung cho nhiều nhà thầu? \n(có trường hợp 1 gói thầu đấu thầu từng phần nên mở từng lần ko? Hoặc đấu lần 1 bị fail đấu lại?",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": true,
+        "PhapNhan": false,
+        "NhaThau": false
+      },
+      "exampleCodes": [
+        "M01_TOR_MEP01"
+      ],
+      "codeExplanation": "Biên bản mở thàu, gói MEP01, dự án M01",
+      "filenameParts": {
+        "documentCodeFormula": "=K13",
+        "description": "Biên bản mở thầu",
+        "revision": "Rev01\nRev02",
+        "exampleFormula": "M01_MEP01_TOR_Biên bản mở thầu_Rev01\nM01_MEP01_TOR_Biên bản mở thầu_Rev02",
+        "exampleValue": "M01_MEP01_TOR_Biên bản mở thầu_Rev01\nM01_MEP01_TOR_Biên bản mở thầu_Rev02"
+      }
+    },
+    {
+      "row": 14,
+      "stage": "2.Đấu thầu",
+      "work": "Trao đổi thông tin/phỏng vấn làm rõ hồ sơ",
+      "dataTypes": "Câu hỏi làm rõ hồ sơ thầu\nBiên bản phỏng vấn thầu\nvà các thành phần hồ sơ liên quan khác",
+      "codeRequirement": "Mỗi bộ hồ sơ dự thầu cần làm rõ thì sẽ trao đổi nên bộ hồ sơ làm rõ sẽ phải đi theo từng nhà thầu riêng biệt.",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": true,
+        "PhapNhan": false,
+        "NhaThau": true
+      },
+      "exampleCodes": [
+        "M01_TCQ_MEP01_CTC",
+        "M01_TCQ_MEP01_HB"
+      ],
+      "codeExplanation": "Hồ sơ làm rõ, gói MEP01, nhà thầu Cottecons\nHồ sơ làm rõ, gói MEP01, nhà tầu Hòa Bình",
+      "filenameParts": {
+        "documentCodeFormula": "=K14",
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 15,
+      "stage": "2.Đấu thầu",
+      "work": "Báo cáo lựa chọn nhà thầu",
+      "dataTypes": "Báo cáo lựa chọn nhà thầu",
+      "codeRequirement": "Có,",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": true,
+        "PhapNhan": false,
+        "NhaThau": false
+      },
+      "exampleCodes": [
+        "M01_TEV_MEP01"
+      ],
+      "codeExplanation": "Báo cáo lựa chọn nhà thâu cho gói thầu MEP01, dự án M01",
+      "filenameParts": {
+        "documentCodeFormula": "=K15",
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 16,
+      "stage": "2.Đấu thầu",
+      "work": "Trao thầu (thông báo trúng thầu)",
+      "dataTypes": "Thư thông báo ý định trao thầu (LOI)/Thông báo trúng thầu (LOA)",
+      "codeRequirement": "Có, \nThư thông báo không trúng thầu: không lưu trữ/không quản lý mã?",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": true,
+        "PhapNhan": false,
+        "NhaThau": true
+      },
+      "exampleCodes": [
+        "M01_LOI_MEP01_CTC",
+        "M01_LOA_MEP01_CTC"
+      ],
+      "codeExplanation": "Thư thông báo ý định trao thầu cho NT CTC, dự án M01, gói MEP01\nThư thông báo trúng thầu cho NT CTC, dự án M01, gói MEP01",
+      "filenameParts": {
+        "documentCodeFormula": "=K16",
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 17,
+      "stage": "3.Hợp đồng",
+      "work": "Soạn hợp đồng và thương thảo",
+      "dataTypes": "Hợp đồng (hợp đồng thi công/tư vấn/mua hàng)",
+      "codeRequirement": null,
+      "components": {
+        "DuAn": false,
+        "LoaiTaiLieu": false,
+        "GoiThau": false,
+        "PhapNhan": false,
+        "NhaThau": false
+      },
+      "exampleCodes": [],
+      "codeExplanation": null,
+      "filenameParts": {
+        "documentCodeFormula": "=K17",
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 18,
+      "stage": "3.Hợp đồng",
+      "work": "Ký hợp đồng",
+      "dataTypes": "Hợp đồng (bản final)",
+      "codeRequirement": "Có, \n1 gói chia nhiều hợp đồng? \n1 nhà thầu có thể có nhiều hợp đồng của cùng 1 gói?\n1 hợp đồng gom nhiều gói?\nMã hợp đồng này có thể độc lập hoặc trùng với số hợp đồng pháp lý nếu phù hợp quy định, và TTG luôn là bên phát hành.",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": false,
+        "PhapNhan": true,
+        "NhaThau": true
+      },
+      "exampleCodes": [
+        "R01_TTDN_CTC_CTR_01",
+        "R01_BDM_CTC_CTR_01"
+      ],
+      "codeExplanation": "Hợp đồng với CTC, TTDN ký.",
+      "filenameParts": {
+        "documentCodeFormula": "=K18",
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 19,
+      "stage": "4.Sau hợp đồng",
+      "work": "Theo dõi thanh toán (tạm ứng và thanh toán đợt)",
+      "dataTypes": "Hồ sơ thanh toán IPC/tạm ứng.\n*Tùy vào điều kiện thanh toán của hợp đồng mà thành phần hồ sơ bao gồm: \n+ Đề nghị thanh toán\n+ Hóa đơn \n+ Hồ sơ chất lượng/khối lượng/giá trị\n+ Đề nghị thanh toán nội bộ",
+      "codeRequirement": "Có,\nTheo dõi được bộ hồ sơ thanh toán từng đợt của từng hợp đồng",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": false,
+        "PhapNhan": true,
+        "NhaThau": true
+      },
+      "exampleCodes": [
+        "M01_TTDN_CTC_CTR_01_IPC_01",
+        "*[HopDong] + IPC+ STT"
+      ],
+      "codeExplanation": "Hồ sơ thanh toán đợt 1 Hợp đồng 01 CTC, dự án M01",
+      "filenameParts": {
+        "documentCodeFormula": "=K19",
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 20,
+      "stage": "4.Sau hợp đồng",
+      "work": "Theo dõi chứng thư bảo lãnh (nếu có)",
+      "dataTypes": "Chứng thư bảo lãnh.\n*Các loại chứng thư bảo lãnh thường có gồm:bảo lãnh tạm ứng, thanh toán, thực hiện hợp đầu, bảo hành.",
+      "codeRequirement": "Phân loại chứng thư, cảnh báo ngày hết hạn",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": false,
+        "PhapNhan": false,
+        "NhaThau": true
+      },
+      "exampleCodes": [
+        "M01_TEB_CTC_260728"
+      ],
+      "codeExplanation": "Bảo lãnh dự thầu, của Cotteccons, ngày hết hạn 260728",
+      "filenameParts": {
+        "documentCodeFormula": "=K20",
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 21,
+      "stage": "4.Sau hợp đồng",
+      "work": "Theo dõi VO/Phụ lục nếu có",
+      "dataTypes": "VO",
+      "codeRequirement": "Có,",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": true,
+        "PhapNhan": false,
+        "NhaThau": true
+      },
+      "exampleCodes": [
+        "M01_TTDN_CTC_CTR_01_VO_01",
+        "*[HopDong] + VO+ STT"
+      ],
+      "codeExplanation": "VO 01 của hợp đồng số M01_TTDN_CTC_CTR_01 Cotteccons",
+      "filenameParts": {
+        "documentCodeFormula": "=K21",
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 22,
+      "stage": "4.Sau hợp đồng",
+      "work": null,
+      "dataTypes": "PL",
+      "codeRequirement": "Có,",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": true,
+        "PhapNhan": false,
+        "NhaThau": true
+      },
+      "exampleCodes": [
+        "M01_TTDN_CTC_CTR_01_PL_01",
+        "*[HopDong] + PL+ STT"
+      ],
+      "codeExplanation": "Phụ lục 01 của hợp đồng số M01_TTDN_CTC_CTR_01 Cotteccons",
+      "filenameParts": {
+        "documentCodeFormula": "=K22",
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 23,
+      "stage": "4.Sau hợp đồng",
+      "work": "Quyết toán",
+      "dataTypes": "Hồ sơ thanh toán. Thành phần hồ sơ (tùy điều kiện hợp đồng): \n+ Đề nghị thanh toán\n+ Hóa đơn \n+ Hồ sơ chất lượng/khối lượng/giá trị\n+ Đề nghị thanh toán nội bộ\n+ Ý kiến vận hành (nếu có)\n+ Biên bản nghiệm thu hoàn thành đưa vào sử dụng (TOC)\n+ Biên bản quyết toán và thanh lý hợp đồng",
+      "codeRequirement": "Có",
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": true,
+        "PhapNhan": false,
+        "NhaThau": true
+      },
+      "exampleCodes": [
+        "M01_TTDN_CTC_CTR_01_FAC",
+        "*[HopDong] + FAC"
+      ],
+      "codeExplanation": "Hồ sơ quyết toán tạm ứng của hợp đồng số M01_TTDN_CTC_CTR_01 Cotteccons",
+      "filenameParts": {
+        "documentCodeFormula": "=K23",
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 24,
+      "stage": "Cung ứng (Mua sắm vật tư thiết bị giao cho nhà thầu thi công lắp đặt)",
+      "work": "Nhận yêu cầu mua hàng",
+      "dataTypes": null,
+      "codeRequirement": null,
+      "components": {
+        "DuAn": false,
+        "LoaiTaiLieu": false,
+        "GoiThau": false,
+        "PhapNhan": false,
+        "NhaThau": false
+      },
+      "exampleCodes": [],
+      "codeExplanation": null,
+      "filenameParts": {
+        "documentCodeFormula": null,
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 25,
+      "stage": "Cung ứng (Mua sắm vật tư thiết bị giao cho nhà thầu thi công lắp đặt)",
+      "work": "Tìm kiếm nhà cung nhận báo giá",
+      "dataTypes": "Báo giá của nhà cung cấp kèm thông tin kỹ thuật",
+      "codeRequirement": null,
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": false,
+        "PhapNhan": false,
+        "NhaThau": true
+      },
+      "exampleCodes": [
+        "M01_QUO_CTC"
+      ],
+      "codeExplanation": null,
+      "filenameParts": {
+        "documentCodeFormula": null,
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 26,
+      "stage": "Cung ứng (Mua sắm vật tư thiết bị giao cho nhà thầu thi công lắp đặt)",
+      "work": "Trình so sánh giá kèm mẫu mã cho BOD để lựa chọn NCC",
+      "dataTypes": null,
+      "codeRequirement": null,
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": false,
+        "PhapNhan": false,
+        "NhaThau": true
+      },
+      "exampleCodes": [
+        "M01_COR_CTC"
+      ],
+      "codeExplanation": null,
+      "filenameParts": {
+        "documentCodeFormula": null,
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    },
+    {
+      "row": 27,
+      "stage": "Cung ứng (Mua sắm vật tư thiết bị giao cho nhà thầu thi công lắp đặt)",
+      "work": "Lập hợp đông tương tự phần đấu thầu",
+      "dataTypes": null,
+      "codeRequirement": null,
+      "components": {
+        "DuAn": true,
+        "LoaiTaiLieu": true,
+        "GoiThau": false,
+        "PhapNhan": false,
+        "NhaThau": true
+      },
+      "exampleCodes": [
+        "Tương tự cách đặt hợp đồng ở trên",
+        "M01_TTDN_CTC_CTR_01"
+      ],
+      "codeExplanation": null,
+      "filenameParts": {
+        "documentCodeFormula": null,
+        "description": null,
+        "revision": null,
+        "exampleFormula": null,
+        "exampleValue": null
+      }
+    }
+  ]
+}

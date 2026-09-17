@@ -282,6 +282,78 @@ def test_plan_batch_checks_collisions_before_confirmation(monkeypatch, tmp_path)
     assert result["collisionCount"] == 1
 
 
+def test_plan_batch_accepts_llm_proposal_and_renders_code(monkeypatch, tmp_path):
+    scan_path = tmp_path / "scan.json"
+    snapshot_path = tmp_path / "master.json"
+    package_path = tmp_path / "package.json"
+    context_path = tmp_path / "prepare-context.json"
+    proposal_path = tmp_path / "proposal.json"
+    scan_path.write_text('{"sourceRoot":"source","files":[{"relativePath":"ho-so-du-thau.pdf","size":1,"sha256":"aa"}],"excluded":[]}', encoding="utf-8")
+    snapshot_path.write_text('{"lists":{"projects":{"items":[{"code":"M01","name":"M01"}]},"packages":{"items":[{"code":"MEP01","name":"MEP01"}]},"legalEntities":{"items":[]},"contractors":{"items":[{"code":"CTC","name":"Coteccons"}]}}}', encoding="utf-8")
+    package_path.write_text('{}', encoding="utf-8")
+    context_path.write_text(__import__("json").dumps({
+        "scanPath": str(scan_path),
+        "masterData": {"snapshotPath": str(snapshot_path)},
+        "package": {"packageFolderName": "TTG.003", "planPath": str(package_path)},
+    }), encoding="utf-8")
+    proposal_path.write_text(__import__("json").dumps({
+        "selectedRuleRow": 25,
+        "documentTypeCode": "BID",
+        "confidence": 0.82,
+        "values": {"DuAn": "M01", "GoiThau": "MEP01", "NhaThau": "CTC"},
+        "proposedDocumentCode": "M01_BID_MEP01_CTC",
+        "missingFields": [],
+        "evidence": ["HoSo row 12", "filename says hồ sơ dự thầu"],
+    }), encoding="utf-8")
+    monkeypatch.setattr(prepare_upload.sp_cnc_upload_ops, "load_config", lambda *_: {})
+    monkeypatch.setattr(prepare_upload.sp_cnc_upload_ops, "check_collisions", lambda *_: {"ok": True, "checked": [], "collisions": []})
+    args = SimpleNamespace(
+        context=str(context_path),
+        document_type="auto",
+        request_context="hồ sơ dự thầu của Coteccons",
+        value=[],
+        llm_proposal=str(proposal_path),
+        llm_min_confidence=0.65,
+    )
+    result = prepare_upload.plan_batch(args)
+    assert result["status"] == "ready"
+    assert result["documentTypeCode"] == "BID"
+    assert "M01_BID_MEP01_CTC" in result["previewMarkdown"]
+
+
+def test_plan_batch_rejects_llm_proposal_code_mismatch(monkeypatch, tmp_path):
+    scan_path = tmp_path / "scan.json"
+    snapshot_path = tmp_path / "master.json"
+    context_path = tmp_path / "prepare-context.json"
+    proposal_path = tmp_path / "proposal.json"
+    scan_path.write_text('{"sourceRoot":"source","files":[{"relativePath":"ho-so-du-thau.pdf","size":1,"sha256":"aa"}],"excluded":[]}', encoding="utf-8")
+    snapshot_path.write_text('{"lists":{"projects":{"items":[{"code":"M01","name":"M01"}]},"packages":{"items":[{"code":"MEP01","name":"MEP01"}]},"legalEntities":{"items":[]},"contractors":{"items":[{"code":"CTC","name":"Coteccons"}]}}}', encoding="utf-8")
+    context_path.write_text(__import__("json").dumps({
+        "scanPath": str(scan_path),
+        "masterData": {"snapshotPath": str(snapshot_path)},
+        "package": {"packageFolderName": "TTG.003", "planPath": "package.json"},
+    }), encoding="utf-8")
+    proposal_path.write_text(__import__("json").dumps({
+        "documentTypeCode": "BID",
+        "confidence": 0.9,
+        "values": {"DuAn": "M01", "GoiThau": "MEP01", "NhaThau": "CTC"},
+        "proposedDocumentCode": "M01_BID_MEP01_HB",
+        "missingFields": [],
+    }), encoding="utf-8")
+    monkeypatch.setattr(prepare_upload.sp_cnc_upload_ops, "check_collisions", lambda *_: (_ for _ in ()).throw(AssertionError("must not check collisions")))
+    args = SimpleNamespace(
+        context=str(context_path),
+        document_type="auto",
+        request_context="hồ sơ dự thầu của Coteccons",
+        value=[],
+        llm_proposal=str(proposal_path),
+        llm_min_confidence=0.65,
+    )
+    result = prepare_upload.plan_batch(args)
+    assert result["status"] == "invalid"
+    assert result["reason"] == "LLM_PROPOSAL_CODE_MISMATCH"
+
+
 def test_plan_batch_blocks_empty_source_before_any_remote_collision_check(monkeypatch, tmp_path):
     scan_path = tmp_path / "scan.json"
     snapshot_path = tmp_path / "master.json"
